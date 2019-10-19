@@ -17,6 +17,7 @@ public class Projectile : MonoBehaviour
 
     [Header("References")]
     public PoolObject HitEffect;
+    public PoolObject HitParticles;
 
     [Header("Controls")]
     public LayerMask CollisionMask;
@@ -37,6 +38,14 @@ public class Projectile : MonoBehaviour
                 eff.transform.position = hit.point + hit.normal * 0.01f;
                 eff.transform.forward = -hit.normal;
             }
+            if(HitParticles != null)
+            {
+                var eff = PoolObject.Spawn(HitParticles);
+                eff.transform.position = hit.point + hit.normal * 0.01f;
+                eff.transform.forward = -hit.normal;
+            }
+
+            hit.transform.BroadcastMessage("UponHit", hit.point, SendMessageOptions.DontRequireReceiver);
         }
         else
         {

@@ -14,6 +14,16 @@ public class AutoDestroy : MonoBehaviour
         }
     }
     private PoolObject _po;
+    public ParticleSystem ParticleSystem
+    {
+        get
+        {
+            if (_ps == null)
+                _ps = GetComponent<ParticleSystem>();
+            return _ps;
+        }
+    }
+    private ParticleSystem _ps;
 
     public float LifeTime = 10;
 
@@ -22,6 +32,10 @@ public class AutoDestroy : MonoBehaviour
     private void UponSpawn()
     {
         timer = 0f;
+        if(ParticleSystem != null)
+        {
+            ParticleSystem.Play(true);
+        }
     }
 
     private void Update()
@@ -30,6 +44,8 @@ public class AutoDestroy : MonoBehaviour
         if (timer >= LifeTime)
         {
             PoolObject.Despawn(PoolObject);
+            if(ParticleSystem != null)
+                ParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             return;
         }
     }

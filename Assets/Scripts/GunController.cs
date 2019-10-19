@@ -35,9 +35,10 @@ public class GunController : MonoBehaviour
 
     [Header("Stats")]
     public int MagazineCapacity = 17;
-    public float RPM = 600f;   
+    public float RPM = 600f;
 
     [Header("Shell Spawning")]
+    public bool SpawnUponShoot = true;
     public FallingShell ShellPrefab;
     public Transform ShellSpawn;
     public Vector3 MinShellVel = new Vector3(1, 1, 0), MaxShellVel = new Vector3(2, 2, 0);
@@ -105,6 +106,11 @@ public class GunController : MonoBehaviour
 
         switch (str)
         {
+            case "spawnshell":
+            case "spawn shell":
+                SpawnShell();
+                break;
+
             case "shoot":
                 if (!BulletInChamber && !IsRecursiveReload)
                 {
@@ -119,14 +125,10 @@ public class GunController : MonoBehaviour
 
                 Player.ItemOffset.AddPunch(finalPunch);
 
-                if(ShellPrefab != null && ShellSpawn != null)
-                {
-                    var spawned = PoolObject.Spawn(ShellPrefab);
-                    spawned.transform.position = ShellSpawn.position;
-                    spawned.transform.rotation = ShellSpawn.rotation;
-                    spawned.Vel = ShellSpawn.TransformVector(new Vector3(Mathf.Lerp(MinShellVel.x, MaxShellVel.x, Random.value), Mathf.Lerp(MinShellVel.y, MaxShellVel.y, Random.value), Mathf.Lerp(MinShellVel.z, MaxShellVel.z, Random.value)));
-                }
-                StartCoroutine(TestFireLate());
+                if (SpawnUponShoot)
+                    SpawnShell();
+
+                StartCoroutine(ShootLate());
 
                 BulletInChamber = false;
 
@@ -164,7 +166,18 @@ public class GunController : MonoBehaviour
         }
     }
 
-    private IEnumerator TestFireLate()
+    public void SpawnShell()
+    {
+        if (ShellPrefab != null && ShellSpawn != null)
+        {
+            var spawned = PoolObject.Spawn(ShellPrefab);
+            spawned.transform.position = ShellSpawn.position;
+            spawned.transform.rotation = ShellSpawn.rotation;
+            spawned.Vel = ShellSpawn.TransformVector(new Vector3(Mathf.Lerp(MinShellVel.x, MaxShellVel.x, Random.value), Mathf.Lerp(MinShellVel.y, MaxShellVel.y, Random.value), Mathf.Lerp(MinShellVel.z, MaxShellVel.z, Random.value)));
+        }
+    }
+
+    private IEnumerator ShootLate()
     {
         yield return new WaitForEndOfFrame();
         if (ProjectilePrefab != null && Muzzle != null)

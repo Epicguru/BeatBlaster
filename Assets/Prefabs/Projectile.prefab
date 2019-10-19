@@ -49,6 +49,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HitEffect: {fileID: 3697963830259405199, guid: e3ecbbdc0df6d264ea5ea54c35ef3ec6,
     type: 3}
+  HitParticles: {fileID: 2615106596660580358, guid: 9be29660cb7277c499221568b6826dec,
+    type: 3}
   CollisionMask:
     serializedVersion: 2
     m_Bits: 1
@@ -79,7 +81,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bd17429507c26446817b6984efda8b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: 25676
+  _id: 14008
   UponSpawn:
     m_PersistentCalls:
       m_Calls: []

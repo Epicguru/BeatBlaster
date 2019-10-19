@@ -22,7 +22,7 @@ public class CameraTurn : MonoBehaviour
         float cY = Input.GetAxisRaw("Mouse Y");
 
         Horizontal.Rotate(0f, cX * Sensitvity, 0f, Space.Self);
-        verticalAngle -= cY;
+        verticalAngle -= cY * Sensitvity;
         verticalAngle = Mathf.Clamp(verticalAngle, -90f, 90f);
         Vertical.localEulerAngles = new Vector3(verticalAngle, 0f, 0f);
     }
