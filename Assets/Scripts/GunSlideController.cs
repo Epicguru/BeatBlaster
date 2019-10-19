@@ -9,13 +9,11 @@ public class GunSlideController : MonoBehaviour
     public float OpenLerp = 0f;
 
     [Header("Code editing only!")]
-    [Range(0f, 1.5f)]
-    public float OverrideLerp = 0f;
-
-    public bool AnimDriven = true;
+    public bool OverrideLock = false;
+    public bool LockOpen = false;
 
     private void LateUpdate()
     {
-        Target.localPosition = Vector3.LerpUnclamped(ClosedPos, OpenPos, AnimDriven ? OpenLerp : OverrideLerp);
+        Target.localPosition = Vector3.LerpUnclamped(ClosedPos, OpenPos, (LockOpen && !OverrideLock) ? 1f : OpenLerp);
     }
 }
