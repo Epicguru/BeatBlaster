@@ -7,15 +7,17 @@ public class GunAnimator : MonoBehaviour
     public Animator Anim;
 
     [Header("Timing")]
-    public Vector2 ADSTimes = new Vector2(0.35f, 0.5f);
-    public Vector2 CrouchTimes = new Vector2(0.35f, 0.35f);
+    public Vector2 ADSTimes = new Vector2(0.15f, 0.2f);
+    public Vector2 CrouchTimes = new Vector2(0.15f, 0.2f);
 
     [Header("Controls")]
+    public bool IsRecursiveReload = false;
     public bool Run = false;
     public bool ADS = false;
     public bool Crouch = false;
     public bool IsEmpty = false;
     public bool Reload = false;
+    public bool StopRecursiveReload = false;
     public bool CheckMagazine = false;
     public bool Shoot = false;
     public bool Chamber = false;
@@ -56,12 +58,28 @@ public class GunAnimator : MonoBehaviour
             if(!IsReloading && !IsCheckingMagazine)
             {
                 IsReloading = true;
-                Anim.SetTrigger("Reload");
+
+                if (!IsRecursiveReload)
+                {
+                    Anim.SetTrigger("Reload");
+                }
+                else
+                {
+                    Anim.SetBool("Reload", true);
+                }
                 if (IsEmpty)
                     IsChambering = true;
             }
         }
+        if (StopRecursiveReload)
+        {
+            StopRecursiveReload = false;
 
+            if (IsRecursiveReload && IsReloading)
+            {
+                Anim.SetBool("Reload", false);
+            }
+        }
         if (CheckMagazine)
         {
             CheckMagazine = false;
@@ -81,14 +99,17 @@ public class GunAnimator : MonoBehaviour
             ads = false;
             crouch = false;
         }
-        else
+
+        if (Shoot)
         {
-            if (Shoot)
+            Shoot = false;
+
+            if(IsRecursiveReload || (!IsReloading && !IsCheckingMagazine))
             {
-                Shoot = false;
                 Anim.SetTrigger("Shoot");
             }
         }
+        
 
         Anim.SetBool("Run", run);
 
@@ -109,7 +130,26 @@ public class GunAnimator : MonoBehaviour
         switch (s)
         {
             case "reload":
-                IsReloading = false;
+                if(!IsRecursiveReload)
+                    IsReloading = false;
+                break;
+            case "stop reload":
+            case "stopreload":
+            case "end reload":
+            case "endreload":
+            case "reload stop":
+            case "reloadstop":
+            case "reload end":
+            case "reloadend":
+                if (IsRecursiveReload)
+                {
+                    IsReloading = false;
+                    Anim.SetBool("Reload", false);
+                }
+                else
+                {
+                    Debug.LogError("Should not be using stop/end reload when the gun is not a recursive reload. Use 'reload' instead.");
+                }
                 break;
 
             case "check mag":

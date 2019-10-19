@@ -1,4 +1,5 @@
 ﻿
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(GunAnimator))]
@@ -14,34 +15,63 @@ public class GunController : MonoBehaviour
         }
     }
     private GunAnimator _gunAnim;
+    public float ADSLerp { get { return Anim.ADSLerp; } }
 
-    public Transform Muzzle;
+    [Header("Core")]
+    public bool InvertSlideBehaviour = false;
+    public bool IsRecursiveReload = false;
 
+    [Header("References")]
+    public PlayerController Player;
+
+    [Header("Item")]
     public Vector3 Offset = Vector3.zero;
+
+    [Header("Shooting")]
     public FireMode FireMode = FireMode.Auto;
+    public Projectile ProjectilePrefab;
+    public Transform Muzzle;
+    public float MuzzleVelocity = 400;
+
+    [Header("Stats")]
     public int MagazineCapacity = 17;
-    public int CurrentBullets = 17;
-    public bool BulletInChamber = true;
-    public float RPM = 600f;
-    public Transform ShellSpawn;
-    public Vector3 MinShellVel, MaxShellVel;
+    public float RPM = 600f;   
+
+    [Header("Shell Spawning")]
     public FallingShell ShellPrefab;
+    public Transform ShellSpawn;
+    public Vector3 MinShellVel = new Vector3(1, 1, 0), MaxShellVel = new Vector3(2, 2, 0);
+
+    [Header("Recoil")]
+    public Vector2 ShootPunchPitch = new Vector2(-4f, 4f);
+    public Vector2 ShootPunchYaw = new Vector2(5f, 10f);
+    public Vector2 ShootPunchRoll = new Vector2(-1f, 1f);
+    public Vector3 HipfirePunchMultiplier = new Vector3(2f, 2f, 2f);
+
+    [Header("Status")]
+    public bool BulletInChamber = true;
+    public int CurrentBullets = 17;
 
     private float shootTimer = 0f;
 
     private void Update()
     {
+        Anim.IsRecursiveReload = IsRecursiveReload;
         transform.localPosition = Offset;
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R) && CurrentBullets < MagazineCapacity)
             Anim.Reload = true;
         if (Input.GetKeyDown(KeyCode.F))
             Anim.CheckMagazine = true;
         switch (FireMode)
         {
             case FireMode.Single:
-                if ((Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Mouse0)) && BulletInChamber)
+                if ((Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Mouse0)) && (BulletInChamber || (IsRecursiveReload && Anim.IsReloading)))
+                {
+                    if (IsRecursiveReload && CurrentBullets == 0 && !Anim.IsReloading)
+                        BulletInChamber = false;
                     Anim.Shoot = true;
+                }
                 break;
             case FireMode.Auto:
                 shootTimer += Time.deltaTime;
@@ -49,7 +79,11 @@ public class GunController : MonoBehaviour
                 {
                     shootTimer = 0f;
                     if ((Input.GetKey(KeyCode.E) || Input.GetKey(KeyCode.Mouse0)) && BulletInChamber)
+                    {
+                        if (IsRecursiveReload && CurrentBullets == 0)
+                            BulletInChamber = false;
                         Anim.Shoot = true;
+                    }
                 }                
                 break;
         }
@@ -62,7 +96,7 @@ public class GunController : MonoBehaviour
             Anim.Chamber = true;
 
         Anim.IsEmpty = !BulletInChamber;
-        Anim.Slide.LockOpen = !BulletInChamber;
+        Anim.Slide.LockOpen = InvertSlideBehaviour ? BulletInChamber : !BulletInChamber;
     }
 
     private void UponAnimationEvent(AnimationEvent e)
@@ -72,17 +106,18 @@ public class GunController : MonoBehaviour
         switch (str)
         {
             case "shoot":
-                if (!BulletInChamber)
+                if (!BulletInChamber && !IsRecursiveReload)
                 {
                     Debug.LogError("Animation-CodeState desync.");
                     break;
                 }
 
-                Debug.Log("Pew");
-                if(Muzzle != null && Physics.Raycast(new Ray(Muzzle.position, Muzzle.forward), out RaycastHit hit, 100f))
-                {
-                    Debug.DrawLine(Muzzle.position, hit.point, Color.red, 5f);
-                }
+                Vector3 multiplier = Vector3.Lerp(HipfirePunchMultiplier, Vector3.one, ADSLerp);
+                Vector3 basePunch = new Vector3(-Random.Range(ShootPunchPitch.x, ShootPunchPitch.y), Random.Range(ShootPunchYaw.x, ShootPunchYaw.y), Random.Range(ShootPunchRoll.x, ShootPunchRoll.y));
+
+                Vector3 finalPunch = new Vector3(multiplier.x * basePunch.x, multiplier.y * basePunch.y, multiplier.z * basePunch.z);
+
+                Player.ItemOffset.AddPunch(finalPunch);
 
                 if(ShellPrefab != null && ShellSpawn != null)
                 {
@@ -91,9 +126,11 @@ public class GunController : MonoBehaviour
                     spawned.transform.rotation = ShellSpawn.rotation;
                     spawned.Vel = ShellSpawn.TransformVector(new Vector3(Mathf.Lerp(MinShellVel.x, MaxShellVel.x, Random.value), Mathf.Lerp(MinShellVel.y, MaxShellVel.y, Random.value), Mathf.Lerp(MinShellVel.z, MaxShellVel.z, Random.value)));
                 }
+                StartCoroutine(TestFireLate());
 
                 BulletInChamber = false;
-                if (CurrentBullets > 0)
+
+                if (!IsRecursiveReload && CurrentBullets > 0)
                 {
                     CurrentBullets--;
                     BulletInChamber = true;
@@ -101,14 +138,43 @@ public class GunController : MonoBehaviour
                 break;
 
             case "chamber":
-                BulletInChamber = true;
                 if (CurrentBullets > 0)
+                {
+                    BulletInChamber = true;
                     CurrentBullets--;
+                }
                 break;
 
             case "reload":
-                CurrentBullets = MagazineCapacity;
+                if (!IsRecursiveReload)
+                {
+                    CurrentBullets = MagazineCapacity;
+                }
+                else
+                {
+                    if(CurrentBullets < MagazineCapacity)
+                        CurrentBullets++;
+
+                    if(CurrentBullets >= MagazineCapacity)
+                    {
+                        Anim.StopRecursiveReload = true;
+                    }
+                }
                 break;
+        }
+    }
+
+    private IEnumerator TestFireLate()
+    {
+        yield return new WaitForEndOfFrame();
+        if (ProjectilePrefab != null && Muzzle != null)
+        {
+            var spawned = PoolObject.Spawn(ProjectilePrefab);
+            spawned.Velocity = Muzzle.forward * MuzzleVelocity;
+            spawned.transform.position = Muzzle.transform.position + Muzzle.forward * 0.1f;
+
+            //spawned.Velocity = transform.forward * MuzzleVelocity;
+            //spawned.transform.position = transform.TransformPoint(muzzleOffset);
         }
     }
 }

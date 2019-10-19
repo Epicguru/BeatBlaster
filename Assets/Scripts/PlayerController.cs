@@ -2,8 +2,11 @@
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("References")]
     public CharacterController Controller;
     public Transform HeadHeight;
+    public ItemAngleOffset ItemOffset;
+    public GunController Gun;
 
     [Header("Movement")]
     public float GravityForce = 9.81f;
@@ -29,6 +32,7 @@ public class PlayerController : MonoBehaviour
         }
 
         IsRunning = Input.GetKey(KeyCode.LeftShift);
+        ItemOffset.Anim.SetBool("Run", IsRunning);
 
         Vector3 flatDir = Vector3.zero;
         if (Input.GetKey(KeyCode.A))
@@ -40,6 +44,10 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.W))
             flatDir.z += 1f;
         flatDir.Normalize();
+        ItemOffset.Anim.SetBool("Walk", flatDir != Vector3.zero);
+
+        ItemOffset.AnimScale = 0.1f + (1f - Gun.ADSLerp) * 0.9f;
+        ItemOffset.Scale = 0.1f + (1f - Gun.ADSLerp) * 0.9f;
 
         StandingLerp += (!Input.GetKey(KeyCode.LeftControl) ? (1f / StandingTime.y) : (-1f / StandingTime.x)) * Time.deltaTime;
         StandingLerp = Mathf.Clamp01(StandingLerp);
