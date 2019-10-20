@@ -23,6 +23,7 @@ public class Projectile : MonoBehaviour
     public LayerMask CollisionMask;
     public Vector3 Velocity;
     public float LifeTime = 5f;
+    public float HitImpulse = 2.5f;
 
     private void Update()
     {       
@@ -37,6 +38,7 @@ public class Projectile : MonoBehaviour
                 var eff = PoolObject.Spawn(HitEffect);
                 eff.transform.position = hit.point + hit.normal * 0.01f;
                 eff.transform.forward = -hit.normal;
+                eff.transform.parent = hit.collider.transform;
             }
             if(HitParticles != null)
             {
@@ -46,6 +48,11 @@ public class Projectile : MonoBehaviour
             }
 
             hit.transform.BroadcastMessage("UponHit", hit.point, SendMessageOptions.DontRequireReceiver);
+
+            if(hit.collider.attachedRigidbody != null)
+            {
+                hit.collider.attachedRigidbody.AddForceAtPosition(Velocity.normalized * HitImpulse, hit.point, ForceMode.Impulse);
+            }
         }
         else
         {

@@ -53,9 +53,10 @@ MonoBehaviour:
     type: 3}
   CollisionMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 259
   Velocity: {x: 0, y: 0, z: 0}
   LifeTime: 5
+  HitImpulse: 2.5
 --- !u!114 &7308468890609416913
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -81,7 +82,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bd17429507c26446817b6984efda8b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: 14008
+  _id: 13218
   UponSpawn:
     m_PersistentCalls:
       m_Calls: []

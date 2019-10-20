@@ -72,7 +72,7 @@ public class GunController : MonoBehaviour
         switch (FireMode)
         {
             case FireMode.Single:
-                if ((Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Mouse0)) && (BulletInChamber || (IsRecursiveReload && Anim.IsReloading)))
+                if (Input.GetKeyDown(KeyCode.Mouse0) && (BulletInChamber || (IsRecursiveReload && Anim.IsReloading)))
                 {
                     if (IsRecursiveReload && CurrentBullets == 0 && !Anim.IsReloading)
                         BulletInChamber = false;
@@ -84,7 +84,7 @@ public class GunController : MonoBehaviour
                 if(shootTimer >= 1f / (RPM / 60f))
                 {
                     shootTimer = 0f;
-                    if ((Input.GetKey(KeyCode.E) || Input.GetKey(KeyCode.Mouse0)) && BulletInChamber)
+                    if (Input.GetKey(KeyCode.Mouse0) && BulletInChamber)
                     {
                         if (IsRecursiveReload && CurrentBullets == 0)
                             BulletInChamber = false;
@@ -94,7 +94,7 @@ public class GunController : MonoBehaviour
                 break;
         }
 
-        Anim.ADS = Input.GetKey(KeyCode.Q) || Input.GetKey(KeyCode.Mouse1);
+        Anim.ADS = Input.GetKey(KeyCode.Mouse1);
         Anim.Run = Input.GetKey(KeyCode.LeftShift);
         Anim.Crouch = Input.GetKey(KeyCode.LeftControl);
 

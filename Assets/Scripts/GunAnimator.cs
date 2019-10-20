@@ -130,6 +130,14 @@ public class GunAnimator : MonoBehaviour
         Anim.SetLayerWeight(2, ADSLerp);
     }
 
+    public void Equip()
+    {
+        IsReloading = false;
+        IsChambering = false;
+        IsCheckingMagazine = false;
+        Anim.SetTrigger("Equip");
+    }
+
     private void UponAnimationEvent(AnimationEvent e)
     {
         string s = e.stringParameter.Trim().ToLower();

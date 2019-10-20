@@ -18,6 +18,7 @@ public class PoolObject : MonoBehaviour
     }
     [SerializeField]
     private int _id;
+    public bool IsPooled { get; private set; }
 
     private static Transform GetParent()
     {
@@ -48,6 +49,7 @@ public class PoolObject : MonoBehaviour
             pooled.Add(obj.PrefabID, new Queue<PoolObject>());
         }
         pooled[obj.PrefabID].Enqueue(obj);
+        obj.IsPooled = true;
     }
 
     private static PoolObject CreateNew(PoolObject prefab)
@@ -58,6 +60,8 @@ public class PoolObject : MonoBehaviour
         prefab._id = prefab.GetInstanceID();
         var spawned = Instantiate(prefab);
         Debug.Assert(spawned.PrefabID == prefab._id);
+
+        spawned.IsPooled = false;
 
         return spawned;
     }
@@ -76,6 +80,7 @@ public class PoolObject : MonoBehaviour
             var sp = CreateNew(prefab);
             sp.transform.parent = null;
             sp.gameObject.SetActive(true);
+            sp.IsPooled = false;
             sp.InvokeUponSpawn();
             return sp;
         }
@@ -83,6 +88,7 @@ public class PoolObject : MonoBehaviour
         {
             fromPool.transform.parent = null;
             fromPool.gameObject.SetActive(true);
+            fromPool.IsPooled = false;
             fromPool.InvokeUponSpawn();
             return fromPool;
         }
@@ -117,6 +123,9 @@ public class PoolObject : MonoBehaviour
     public static void Despawn(PoolObject obj)
     {
         if (obj == null)
+            return;
+
+        if (obj.IsPooled)
             return;
 
         AddToPool(obj);

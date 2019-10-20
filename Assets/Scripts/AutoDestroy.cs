@@ -38,6 +38,12 @@ public class AutoDestroy : MonoBehaviour
         }
     }
 
+    private void UponDespawn()
+    {
+        // This may seem odd, but there is a reason for it. Trust me.
+        PoolObject.Despawn(this.PoolObject);
+    }
+
     private void Update()
     {
         timer += Time.deltaTime;
