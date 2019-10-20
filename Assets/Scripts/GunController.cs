@@ -33,6 +33,9 @@ public class GunController : MonoBehaviour
     public Transform Muzzle;
     public float MuzzleVelocity = 400;
 
+    [Header("Aim Down Sights")]
+    public float ADSZoom = 1.25f;
+
     [Header("Stats")]
     public int MagazineCapacity = 17;
     public float RPM = 600f;
@@ -64,6 +67,8 @@ public class GunController : MonoBehaviour
             Anim.Reload = true;
         if (Input.GetKeyDown(KeyCode.F))
             Anim.CheckMagazine = true;
+        if (Input.GetKeyDown(KeyCode.G))
+            Anim.Inspect = true;
         switch (FireMode)
         {
             case FireMode.Single:

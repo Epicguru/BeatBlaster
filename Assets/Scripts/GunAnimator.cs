@@ -21,6 +21,7 @@ public class GunAnimator : MonoBehaviour
     public bool CheckMagazine = false;
     public bool Shoot = false;
     public bool Chamber = false;
+    public bool Inspect = false;
 
     [Header("States")]
     public bool IsReloading = false;
@@ -50,6 +51,12 @@ public class GunAnimator : MonoBehaviour
                 IsChambering = true;
                 Anim.SetTrigger("Chamber");
             }
+        }
+
+        if (Inspect)
+        {
+            Inspect = false;
+            Anim.SetTrigger("Inspect");
         }
 
         if (Reload)

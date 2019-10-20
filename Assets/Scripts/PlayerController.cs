@@ -7,6 +7,8 @@ public class PlayerController : MonoBehaviour
     public Transform HeadHeight;
     public ItemAngleOffset ItemOffset;
     public GunController Gun;
+    public Camera MainCamera;
+    public CameraTurn CameraTurn;
 
     [Header("Movement")]
     public float GravityForce = 9.81f;
@@ -18,15 +20,26 @@ public class PlayerController : MonoBehaviour
 
     [Header("Crouching")]
     public Vector2 CameraHeights = new Vector2(0.5f, 1f);
+    public Vector2 ColliderHeights = new Vector2(1f, 1.9f);
     [Range(0f, 1f)]
     public float StandingLerp = 1f;
     public Vector2 StandingTime = new Vector2(0.3f, 0.4f);
+
+    [Header("Camera")]
+    public float DefaultFOV = 65f;
 
     private float verticalVel;
 
     private void Update()
     {
-        if(OnFloor && Input.GetKeyDown(KeyCode.Space))
+        float fov = MainCamera.fieldOfView;
+        float targetFov = Mathf.Lerp(DefaultFOV, DefaultFOV / Gun.ADSZoom, Gun.ADSLerp);
+        if (fov != targetFov)
+            MainCamera.fieldOfView = targetFov;
+
+        CameraTurn.InternalSens = Mathf.Lerp(1f, (1f / Gun.ADSZoom), Gun.ADSLerp);
+
+        if (OnFloor && Input.GetKeyDown(KeyCode.Space))
         {
             verticalVel = JumpVelocity;
         }
@@ -52,6 +65,9 @@ public class PlayerController : MonoBehaviour
         StandingLerp += (!Input.GetKey(KeyCode.LeftControl) ? (1f / StandingTime.y) : (-1f / StandingTime.x)) * Time.deltaTime;
         StandingLerp = Mathf.Clamp01(StandingLerp);
         HeadHeight.transform.localPosition = new Vector3(0f, Mathf.Lerp(CameraHeights.x, CameraHeights.y, StandingLerp));
+        float centerOffset = (ColliderHeights.y - ColliderHeights.x) * 0.5f;
+        Controller.height = Mathf.Lerp(ColliderHeights.x, ColliderHeights.y, StandingLerp);
+        Controller.center = new Vector3(0f, Mathf.Lerp(0f, centerOffset, StandingLerp), 0f);
 
         Vector3 worldSpace = transform.TransformDirection(flatDir);
         verticalVel += GravityForce * Time.deltaTime;
