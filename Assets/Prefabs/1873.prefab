@@ -1086,8 +1086,10 @@ MonoBehaviour:
     type: 3}
   Muzzle: {fileID: 591806317}
   MuzzleVelocity: 450
+  ADSZoom: 1.25
   MagazineCapacity: 5
   RPM: 600
+  SpawnUponShoot: 1
   ShellPrefab: {fileID: 1772820906983008344, guid: 9129177de0a512943960bb1003910aae,
     type: 3}
   ShellSpawn: {fileID: 40876011}
@@ -1125,6 +1127,7 @@ MonoBehaviour:
   CheckMagazine: 0
   Shoot: 0
   Chamber: 0
+  Inspect: 0
   IsReloading: 0
   IsCheckingMagazine: 0
   IsChambering: 0

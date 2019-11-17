@@ -633,14 +633,17 @@ MonoBehaviour:
   Anim: {fileID: 8296172668110058506}
   ADSTimes: {x: 0.15, y: 0.2}
   CrouchTimes: {x: 0.15, y: 0.2}
+  IsRecursiveReload: 0
   Run: 0
   ADS: 0
   Crouch: 0
   IsEmpty: 0
   Reload: 0
+  StopRecursiveReload: 0
   CheckMagazine: 0
   Shoot: 0
   Chamber: 0
+  Inspect: 0
   IsReloading: 0
   IsCheckingMagazine: 0
   IsChambering: 0
@@ -658,6 +661,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e2b1b0134db1849a2de9b068cc211c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  InvertSlideBehaviour: 0
+  IsRecursiveReload: 0
   Player: {fileID: 0}
   Offset: {x: 0, y: 0, z: 0}
   FireMode: 0
@@ -665,8 +670,10 @@ MonoBehaviour:
     type: 3}
   Muzzle: {fileID: 311576564}
   MuzzleVelocity: 400
+  ADSZoom: 1.25
   MagazineCapacity: 17
   RPM: 950
+  SpawnUponShoot: 1
   ShellPrefab: {fileID: 4232246883091812776, guid: 49284d89de217a542b7f613884a8eb73,
     type: 3}
   ShellSpawn: {fileID: 6391283703359137724}
@@ -806,6 +813,9 @@ MonoBehaviour:
   Target: {fileID: 7836090384558910760}
   ClosedPos: {x: -0.001312969, y: -0.01597383, z: 0.05221118}
   OpenPos: {x: -0.001312969, y: 0.0114, z: 0.05221118}
+  UseRotation: 0
+  ClosedRotation: {x: 0, y: 0, z: 0}
+  OpenRotation: {x: 0, y: 0, z: 0}
   OpenLerp: 0
   OverrideLock: 0
   LockOpen: 0

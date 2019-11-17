@@ -40,13 +40,14 @@ public class GunSwapper : MonoBehaviour
 
     private void SetActive(GunController c)
     {
-        c.gameObject.SetActive(true);
+        //c.Anim.Anim.enabled = true;
+        c.Anim.Anim.gameObject.SetActive(true);
         Character.Gun = c;
-        c.Anim.Equip();
     }
 
     private void Disable(GunController c)
     {
-        c.gameObject.SetActive(false);
+        //c.Anim.Anim.enabled = false;
+        c.Anim.Anim.gameObject.SetActive(false);
     }
 }
