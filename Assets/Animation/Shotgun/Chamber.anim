@@ -2356,6 +2356,13 @@ AnimationClip:
   m_HasGenericRootTransform: 1
   m_HasMotionFloatCurves: 0
   m_Events:
+  - time: 0.13333334
+    functionName: Event
+    data: playaudio
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0.1
+    intParameter: 1
+    messageOptions: 0
   - time: 0.53333336
     functionName: Event
     data: chamber

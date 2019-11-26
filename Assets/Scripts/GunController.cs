@@ -23,6 +23,7 @@ public class GunController : MonoBehaviour
 
     [Header("References")]
     public PlayerController Player;
+    public AudioClip[] AudioClips;
 
     [Header("Item")]
     public Vector3 Offset = Vector3.zero;
@@ -99,7 +100,13 @@ public class GunController : MonoBehaviour
         Anim.Crouch = Input.GetKey(KeyCode.LeftControl);
 
         if (!BulletInChamber && CurrentBullets > 0 && !Anim.IsChambering)
+        {
             Anim.Chamber = true;
+        }
+        else if (BulletInChamber)
+        {
+            Anim.Chamber = false;
+        }
 
         Anim.IsEmpty = !BulletInChamber;
         Anim.Slide.LockOpen = InvertSlideBehaviour ? BulletInChamber : !BulletInChamber;
@@ -111,6 +118,12 @@ public class GunController : MonoBehaviour
 
         switch (str)
         {
+            case "playaudio":
+            case "play audio":
+                var a = Player.AudioSource;
+                a.PlayOneShot(AudioClips[e.intParameter], e.floatParameter <= 0 ? 1f : e.floatParameter);
+                break;
+
             case "spawnshell":
             case "spawn shell":
                 SpawnShell();

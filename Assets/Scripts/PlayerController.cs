@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     public GunController Gun;
     public Camera MainCamera;
     public CameraTurn CameraTurn;
+    public AudioSource AudioSource;
 
     [Header("Movement")]
     public float GravityForce = 9.81f;

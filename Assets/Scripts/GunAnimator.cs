@@ -45,12 +45,15 @@ public class GunAnimator : MonoBehaviour
         Anim.SetBool("IsEmpty", IsEmpty);
         if (Chamber)
         {
-            Chamber = false;
             if (!IsChambering)
             {
                 IsChambering = true;
                 Anim.SetTrigger("Chamber");
             }
+        }
+        else
+        {
+            Anim.ResetTrigger("Chamber");
         }
 
         if (Inspect)
