@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+[ExecuteInEditMode]
 public class PlayerController : MonoBehaviour
 {
     [Header("References")]
@@ -10,6 +11,7 @@ public class PlayerController : MonoBehaviour
     public Camera MainCamera;
     public CameraTurn CameraTurn;
     public AudioSource AudioSource;
+    public Transform CameraOffset;
 
     [Header("Movement")]
     public float GravityForce = 9.81f;
@@ -33,6 +35,9 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (!Application.isPlaying)
+            return;
+
         float fov = MainCamera.fieldOfView;
         float targetFov = Mathf.Lerp(DefaultFOV, DefaultFOV / Gun.ADSZoom, Gun.ADSLerp);
         if (fov != targetFov)
@@ -83,6 +88,20 @@ public class PlayerController : MonoBehaviour
         {
             Velocity.y = -0.1f;
             OnFloor = true;
+        }        
+    }
+
+    private void LateUpdate()
+    {
+        if((Gun?.CameraAnim ?? null) != null)
+        {
+            CameraOffset.localPosition = Gun.CameraAnim.localPosition;
+            CameraOffset.localRotation = Gun.CameraAnim.localRotation;
         }
+        else
+        {
+            CameraOffset.localPosition = Vector3.zero;
+            CameraOffset.localRotation = Quaternion.identity;
+        }        
     }
 }

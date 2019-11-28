@@ -28,6 +28,9 @@ public class GunController : MonoBehaviour
     [Header("Item")]
     public Vector3 Offset = Vector3.zero;
 
+    [Header("Animation")]
+    public Transform CameraAnim;
+
     [Header("Shooting")]
     public FireMode FireMode = FireMode.Auto;
     public Projectile ProjectilePrefab;
@@ -109,7 +112,8 @@ public class GunController : MonoBehaviour
         }
 
         Anim.IsEmpty = !BulletInChamber;
-        Anim.Slide.LockOpen = InvertSlideBehaviour ? BulletInChamber : !BulletInChamber;
+        if(Anim.Slide != null)
+            Anim.Slide.LockOpen = InvertSlideBehaviour ? BulletInChamber : !BulletInChamber;
     }
 
     private void UponAnimationEvent(AnimationEvent e)

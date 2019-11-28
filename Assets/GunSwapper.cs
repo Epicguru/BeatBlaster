@@ -15,7 +15,7 @@ public class GunSwapper : MonoBehaviour
         Debug.Assert(Keys.Length == Keys.Length);
         for (int i = 0; i < Guns.Length; i++)
         {
-            if(i == CurrentIndex)
+            if (i == CurrentIndex)
             {
                 SetActive(Guns[i]);
             }
@@ -32,7 +32,7 @@ public class GunSwapper : MonoBehaviour
         {
             if (Input.GetKeyDown(Keys[i]) && CurrentIndex != i)
             {
-                StartCoroutine(Disable(Guns[CurrentIndex]));                
+                StartCoroutine(Disable(Guns[CurrentIndex]));
                 CurrentIndex = i;
                 SetActive(Guns[CurrentIndex]);
             }
