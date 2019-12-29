@@ -25,6 +25,14 @@ public class Projectile : MonoBehaviour
     public float LifeTime = 5f;
     public float HitImpulse = 2.5f;
 
+    [Header("Damage")]
+    public int Damage = 10;
+
+    private void UponDespawn()
+    {
+        GetComponent<TrailRenderer>().Clear();
+    }
+
     private void Update()
     {       
         Vector3 newPos = transform.position + Velocity * Time.deltaTime;
@@ -47,7 +55,16 @@ public class Projectile : MonoBehaviour
                 eff.transform.forward = -hit.normal;
             }
 
-            hit.transform.BroadcastMessage("UponHit", hit.point, SendMessageOptions.DontRequireReceiver);
+            var phit = new ProjectileHit()
+            {
+                WorldPoint = hit.point,
+                WorldNormal = hit.normal,
+                Collider = hit.collider,
+                IncomingVelocity = Velocity,
+                HealthChange = -Damage
+            };
+
+            hit.transform.SendMessageUpwards("UponProjectileHit", phit, SendMessageOptions.DontRequireReceiver);
 
             if(hit.collider.attachedRigidbody != null)
             {

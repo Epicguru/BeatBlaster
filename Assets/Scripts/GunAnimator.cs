@@ -42,6 +42,9 @@ public class GunAnimator : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (!Anim.enabled || !Anim.gameObject.activeInHierarchy)
+            return;
+
         Anim.SetBool("IsEmpty", IsEmpty);
         if (Chamber)
         {

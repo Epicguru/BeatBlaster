@@ -37,6 +37,11 @@ public class GunController : MonoBehaviour
     public Transform Muzzle;
     public float MuzzleVelocity = 400;
 
+    [Header("Advanced shooting")]
+    [Range(1, 256)]
+    public int BulletsPerShot = 1;
+    public Vector2 BulletPathRandomness = Vector2.zero;
+
     [Header("Aim Down Sights")]
     public float ADSZoom = 1.25f;
 
@@ -60,7 +65,7 @@ public class GunController : MonoBehaviour
     public bool BulletInChamber = true;
     public int CurrentBullets = 17;
 
-    private float shootTimer = 0f;
+    private float shootTimer = 100f;
 
     private void Update()
     {
@@ -76,23 +81,28 @@ public class GunController : MonoBehaviour
         switch (FireMode)
         {
             case FireMode.Single:
-                if (Input.GetKeyDown(KeyCode.Mouse0) && (BulletInChamber || (IsRecursiveReload && Anim.IsReloading)))
+                shootTimer += Time.deltaTime;
+                if (shootTimer >= 1f / (RPM / 60f))
                 {
-                    if (IsRecursiveReload && CurrentBullets == 0 && !Anim.IsReloading)
-                        BulletInChamber = false;
-                    Anim.Shoot = true;
+                    if (Input.GetKeyDown(KeyCode.Mouse0) && BulletInChamber)
+                    {
+                        if (IsRecursiveReload && CurrentBullets == 0)
+                            BulletInChamber = false;
+                        Anim.Shoot = true;
+                        shootTimer = 0f;
+                    }
                 }
                 break;
             case FireMode.Auto:
                 shootTimer += Time.deltaTime;
                 if(shootTimer >= 1f / (RPM / 60f))
                 {
-                    shootTimer = 0f;
-                    if (Input.GetKey(KeyCode.Mouse0) && BulletInChamber)
+                    if (Input.GetKey(KeyCode.Mouse0) && (BulletInChamber || (IsRecursiveReload && Anim.IsReloading)))
                     {
                         if (IsRecursiveReload && CurrentBullets == 0)
                             BulletInChamber = false;
                         Anim.Shoot = true;
+                        shootTimer = 0f;
                     }
                 }                
                 break;
@@ -100,7 +110,7 @@ public class GunController : MonoBehaviour
 
         Anim.ADS = Input.GetKey(KeyCode.Mouse1);
         Anim.Run = Input.GetKey(KeyCode.LeftShift);
-        Anim.Crouch = Input.GetKey(KeyCode.LeftControl);
+        Anim.Crouch = Input.GetKey(KeyCode.C);
 
         if (!BulletInChamber && CurrentBullets > 0 && !Anim.IsChambering)
         {
@@ -122,6 +132,8 @@ public class GunController : MonoBehaviour
 
         switch (str)
         {
+            case "playsound":
+            case "play sound":
             case "playaudio":
             case "play audio":
                 var a = Player.AudioSource;
@@ -204,12 +216,21 @@ public class GunController : MonoBehaviour
         yield return new WaitForEndOfFrame();
         if (ProjectilePrefab != null && Muzzle != null)
         {
-            var spawned = PoolObject.Spawn(ProjectilePrefab);
-            spawned.Velocity = Muzzle.forward * MuzzleVelocity;
-            spawned.transform.position = Muzzle.transform.position + Muzzle.forward * 0.1f;
-
-            //spawned.Velocity = transform.forward * MuzzleVelocity;
-            //spawned.transform.position = transform.TransformPoint(muzzleOffset);
+            for (int i = 0; i < BulletsPerShot; i++)
+            {
+                var spawned = PoolObject.Spawn(ProjectilePrefab);
+                Vector3 dir = Muzzle.forward;
+                if(BulletPathRandomness != Vector2.zero)
+                {
+                    Vector3 randomSphere = Random.insideUnitSphere.normalized * Mathf.Lerp(BulletPathRandomness.x, BulletPathRandomness.y, Random.value);
+                    if (randomSphere.z < 0f)
+                        randomSphere.z = -randomSphere.z;
+                    Vector3 inWorldSpace = Muzzle.TransformVector(randomSphere);
+                    dir += inWorldSpace;
+                }
+                spawned.Velocity = dir * MuzzleVelocity;
+                spawned.transform.position = Muzzle.transform.position + Muzzle.forward * 0.1f;
+            }            
         }
     }
 }

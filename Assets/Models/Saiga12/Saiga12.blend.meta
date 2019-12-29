@@ -3,7 +3,42 @@ guid: 3d8772de989c31c489085d446b44ca73
 ModelImporter:
   serializedVersion: 27
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Barrel Black
+    second: {fileID: 2100000, guid: 97ba370a471e87c42b359c70cdb7c969, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Body Color
+    second: {fileID: 2100000, guid: a1a1f37fcf9aeba45a7f6b7d919f6dff, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Charging Handle Silver
+    second: {fileID: 2100000, guid: 475498271aeb07b49b886326bb2b75c5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Magazine Black
+    second: {fileID: 2100000, guid: c4b68f4cca9cdf7498320d3d2f9f9538, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: No Name
+    second: {fileID: 2100000, guid: 7fe45ff244ce2c546987a616759ff0a6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Shell Gold
+    second: {fileID: 2100000, guid: d72b945874f59294eb36d8d153b8d3de, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Shell Red
+    second: {fileID: 2100000, guid: 4caf4fa1bb078e64c913ed082e5395c8, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

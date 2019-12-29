@@ -68,7 +68,7 @@ public class PlayerController : MonoBehaviour
         ItemOffset.AnimScale = 0.1f + (1f - Gun.ADSLerp) * 0.9f;
         ItemOffset.Scale = 0.1f + (1f - Gun.ADSLerp) * 0.9f;
 
-        StandingLerp += (!Input.GetKey(KeyCode.LeftControl) ? (1f / StandingTime.y) : (-1f / StandingTime.x)) * Time.deltaTime;
+        StandingLerp += (!Input.GetKey(KeyCode.C) ? (1f / StandingTime.y) : (-1f / StandingTime.x)) * Time.deltaTime;
         StandingLerp = Mathf.Clamp01(StandingLerp);
         HeadHeight.transform.localPosition = new Vector3(0f, Mathf.Lerp(CameraHeights.x, CameraHeights.y, StandingLerp));
         float centerOffset = (ColliderHeights.y - ColliderHeights.x) * 0.5f;

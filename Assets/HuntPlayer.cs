@@ -10,6 +10,7 @@ public class HuntPlayer : MonoBehaviour
 
     private void Update()
     {
-        Agent.SetDestination(ToHunt.position);    
+        if(Agent.isOnNavMesh)
+            Agent.SetDestination(ToHunt.position);    
     }
 }

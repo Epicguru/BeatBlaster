@@ -37,7 +37,7 @@ public class ClayPidgeon : MonoBehaviour
         GetComponent<Renderer>().material.color = Color.red;
     }
 
-    private void UponHit(Vector3 point)
+    private void UponProjectileHit(ProjectileHit hit)
     {
         PoolObject.Despawn(this.PoolObject);
         Debug.Log("Nice shot!");
