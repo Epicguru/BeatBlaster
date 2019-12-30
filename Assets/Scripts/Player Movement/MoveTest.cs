@@ -5,6 +5,9 @@ public class MoveTest : MonoBehaviour
 {
     public Vector3 TargetOffset;
     public bool DrawDebug = false;
+    public float Depth = 0.2f;
+    public ExtraDistanceResolveMode DstResolveMode = ExtraDistanceResolveMode.Rewind;
+    public AnimationCurve SurfaceAngleDistanceCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
     private CustomCollisionResolver resolver;
     private Vector3 finalPos;
@@ -12,13 +15,16 @@ public class MoveTest : MonoBehaviour
     private void CreateResolver()
     {
         resolver = new CustomCollisionResolver(GetComponent<Collider>());
-        resolver.FastResolveDepth = resolver.RecommendedFastResolveDepth;
+        resolver.SurfaceAngleDistanceCurve = SurfaceAngleDistanceCurve;
     }
 
     private void Update()
     {
         if (resolver == null)
             CreateResolver();
+
+        resolver.FastResolveDepth = Depth;
+        resolver.DistanceCheckMode = DstResolveMode;
 
         resolver.DrawDebug = DrawDebug;
         var result = resolver.ResolveFast(transform.position, transform.position + TargetOffset, 5f);

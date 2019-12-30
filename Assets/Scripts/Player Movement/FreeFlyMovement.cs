@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// A character/camera controller that allows the user to fly around the scene freely, optionally without collision resolution (noclip).
@@ -23,10 +22,18 @@ public class FreeFlyMovement : MonoBehaviour
     public float BaseSpeed = 10f;
     public float BoostedSpeed = 25f;
 
+    [Header("Collision Resolving")]
+    public float PenDepth = 0.2f;
+    public ExtraDistanceResolveMode DstResolveMode = ExtraDistanceResolveMode.None;
+
     [Header("Mouse Look")]
     public bool EnableMouseLook = false;
     public bool CaptureMouse = true;
     public float MouseSensitivity = 1f;
+
+    [Header("Debug")]
+    public bool DrawDebug = false;
+    public bool ForwardSpeedTest = false;
 
     public CustomCollisionResolver CollisionResolver;
 
@@ -40,6 +47,13 @@ public class FreeFlyMovement : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.N))
+            NoClip = !NoClip;
+
+        CollisionResolver.DrawDebug = DrawDebug;
+        CollisionResolver.FastResolveDepth = PenDepth;
+        CollisionResolver.DistanceCheckMode = DstResolveMode;
+
         if (EnableMouseLook)
             UpdateMouseLook();
 
@@ -59,6 +73,11 @@ public class FreeFlyMovement : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
     }
 
     private void UpdateMovement()
@@ -76,7 +95,7 @@ public class FreeFlyMovement : MonoBehaviour
         {
             direction -= transform.forward;
         }
-        if (Input.GetKey(KeyCode.W))
+        if (ForwardSpeedTest || Input.GetKey(KeyCode.W))
         {
             direction += transform.forward;
         }
@@ -90,10 +109,10 @@ public class FreeFlyMovement : MonoBehaviour
         }
 
         float speed = Input.GetKey(KeyCode.LeftShift) ? BoostedSpeed : BaseSpeed;
-        Vector3 offset = direction * speed * Time.deltaTime;
+        Vector3 offset = direction.normalized * speed * Time.deltaTime;
 
-        if (offset == Vector3.zero)
-            return;
+        //if (offset == Vector3.zero)
+        //    return;
 
         if (NoClip)
         {
@@ -107,6 +126,8 @@ public class FreeFlyMovement : MonoBehaviour
             if (!Collider.enabled)
                 Collider.enabled = true;
 
+            if(DrawDebug)
+                Debug.DrawLine(transform.position, transform.position + offset, Color.black);
             var res = CollisionResolver.ResolveFast(transform.position, transform.position + offset);
             if (!res.HasError)
             {

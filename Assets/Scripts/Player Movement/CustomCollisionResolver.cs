@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CustomCollisionResolver
 {
+    // TODO: make sure the CustomCollisionResults are being returned correctly.
+
     protected static Collider[] Overlaps = new Collider[128];
     protected static RaycastHit[] Hits = new RaycastHit[128];
     private static Dictionary<Collider, float> penetrationDepths = new Dictionary<Collider, float>();
@@ -32,9 +34,18 @@ public class CustomCollisionResolver
         {
             if (value < 0.01f)
                 _fastResolveDepth = 0.01f;
-            _fastResolveDepth = value;
+            else
+                _fastResolveDepth = value;
         }
     }
+    /// <summary>
+    /// The distance reduction mode used with calculating new path. This ensures that the object will not travel faster than intended.
+    /// </summary>
+    public ExtraDistanceResolveMode DistanceCheckMode = ExtraDistanceResolveMode.Truncate;
+    /// <summary>
+    /// The curve used to calculate the distance multiplier based on the initial angle of impact. This affects how far the collider 'slides' along surfaces when it hits them at an angle.
+    /// </summary>
+    public AnimationCurve SurfaceAngleDistanceCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
     /// <summary>
     /// Gets a useful recommendation for the value of <see cref="FastResolveDepth"/> based on the current collider.
@@ -47,7 +58,7 @@ public class CustomCollisionResolver
             if (Collider is CapsuleCollider)
             {
                 var cap = Collider as CapsuleCollider;
-                return cap.radius * 0.75f;
+                return cap.radius * 0.9f;
             }
 
             if (Collider is BoxCollider)
@@ -59,7 +70,7 @@ public class CustomCollisionResolver
             if (Collider is SphereCollider)
             {
                 var sphere = Collider as SphereCollider;
-                return sphere.radius * 0.75f;
+                return sphere.radius * 0.9f;
             }
 
             return 0.2f;
@@ -98,9 +109,20 @@ public class CustomCollisionResolver
         // but this will also prevent the sliding along surfaces that is desired.
         const float IDENTICAL_POS_TOLERANCE = 0.002f * 0.002f; // 2mm
         Vector3 dir = (endPos - startPos).normalized;
-        Vector3 offset = dir * _fastResolveDepth;
-        float targetDistance = (endPos - finalPos).magnitude;
+
+
+        // Note to self: if pen depth is greater than the overall distance that we want to travel (start to end), then due to the nature of the algorithm the resolved position will put the object further than (start to end) distance.
+        // Because of this pend depth must be limited to be at most as large as the total distance.
+        float depthToUse = _fastResolveDepth;
+        //float cap = (endPos - startPos).magnitude;
+        //if (depthToUse > cap)
+        //    depthToUse = cap;
+
+        Vector3 offset = dir * depthToUse;
+
+        float targetDistance = (endPos - finalPos).magnitude * (1f);
         CustomCollisionResult result = default;
+        float multiplier = 1f;
 
         // To solve the no sliding issue, we slide a bunch of times in very small increments.
         for (int i = 0; i < 1000; i++)
@@ -111,17 +133,111 @@ public class CustomCollisionResolver
             if ((finalPos - result.FinalPosition).sqrMagnitude <= IDENTICAL_POS_TOLERANCE)
                 break;
 
+            if(i == 0)
+            {
+                // Work out normal of first surface.
+                Vector3 start = finalPos + offset;
+                Vector3 end = result.FinalPosition;
+
+                // Work out incoming vector.
+                Vector3 start2 = finalPos;
+                Vector3 end2 = finalPos + offset;
+
+                // Draw normals.
+                if (DrawDebug)
+                {
+                    Debug.DrawLine(start, end - (end - start) * 0.7f, Color.green);
+                    Debug.DrawLine(end2, end2 + (start2 - end2) * 0.3f, Color.green);
+                }
+
+                Vector3 normalized1 = (end - start).normalized;
+                Vector3 normalized2 = (start2 - end2).normalized;
+                float dot = Vector3.Dot(normalized1, normalized2);
+                multiplier = Mathf.Clamp01(1f - dot);
+                multiplier = SurfaceAngleDistanceCurve.Evaluate(multiplier);
+                targetDistance *= multiplier;
+            }
+
             targetDistance -= (finalPos - result.FinalPosition).magnitude;
 
+            // Draw final path (magenta).
             if(DrawDebug)
                 Debug.DrawLine(finalPos, result.FinalPosition, new Color(1, 0, 1, 0.7f));
 
-            finalPos = result.FinalPosition;
-            if (targetDistance <= 0f)
+            // Rewind 'jittering' bug fix:
+            bool appliedJitterFix = false;
+            if(DistanceCheckMode == ExtraDistanceResolveMode.Rewind)
+            {
+                if(multiplier < 0.01f)
+                {
+                    DistanceCheckMode = ExtraDistanceResolveMode.Truncate;
+                    appliedJitterFix = true;
+                }
+            }
+
+            bool done = false;
+            switch (DistanceCheckMode)
+            {
+                case ExtraDistanceResolveMode.None:
+                    if (targetDistance <= 0f)
+                        done = true;
+                    break;
+                case ExtraDistanceResolveMode.Truncate:
+                    if (targetDistance <= 0f && i > 0) // Only applicable after the first move, because otherwise there is nothing to truncate!
+                    {
+                        // Set this frames final position to last frames final. Essentially rewinds the path by one segment.
+                        result.FinalPosition = finalPos;
+                        done = true;
+                    }
+                    break;
+                case ExtraDistanceResolveMode.Rewind:
+                    if (targetDistance <= 0f)
+                    {
+                        // Rewind along the 'real' path (magenta).
+                        float excess = -targetDistance;
+                        Vector3 fixDir = (finalPos - result.FinalPosition);
+                        if(excess < fixDir.magnitude)
+                        {
+                            Vector3 realFinal = result.FinalPosition + fixDir.normalized * excess;
+                            result.FinalPosition = realFinal;
+                        }
+                        else
+                        {
+                            Vector3 realFinal = finalPos; // Last frame's one.
+                            result.FinalPosition = realFinal;
+                        }
+                        done = true;
+                    }
+                    break;
+            }
+
+            if (appliedJitterFix)
+            {
+                DistanceCheckMode = ExtraDistanceResolveMode.Rewind;
+            }
+
+            if (done)
+            {
                 break;
+            }
+
+            finalPos = result.FinalPosition;
         }
         
         return result;
+    }
+
+    public CustomCollisionResult ResolveSimple(Vector3 startPos, Vector3 endPos, float maxTimeMS = 2f, bool givePenetrationStats = false)
+    {
+        // Sweep along line to check for collision.
+        bool didHit = SweepCheck(startPos, endPos, out Vector3 finalPos);
+        if (!didHit)
+        {
+            return new CustomCollisionResult() { FinalPosition = endPos, ComputationItterations = 0, NoCollisions = true };
+        }
+
+        float penDepth = FastResolveDepth;
+        return Resolve(finalPos, finalPos + (endPos - startPos).normalized * penDepth, maxTimeMS, givePenetrationStats);
     }
 
     /// <summary>
@@ -221,7 +337,7 @@ public class CustomCollisionResolver
                 }
 
                 // Move working position out of the way.
-                const float ADDITIONAL = 0.00001f;
+                const float ADDITIONAL = 0.0001f;
                 Vector3 offset = resolveDir * (resolveDst + ADDITIONAL);
                 if (DrawDebug)
                 {
@@ -232,7 +348,12 @@ public class CustomCollisionResolver
             }
             else
             {
-                //Debug.LogWarning($"Did not overlap with {found.name}");
+                //Debug.LogWarning($"Did not overlap with {found.name}!");
+                if (DrawDebug)
+                {
+                    Debug.DrawLine(startPos, endPos, Color.red);
+                    Debug.DrawLine(startPos, startPos + Vector3.up * 0.1f, Color.red);
+                }                
                 break;
             }
 
@@ -296,53 +417,104 @@ public class CustomCollisionResolver
         if(box != null)
         {
             int hitCount = Physics.BoxCastNonAlloc(start, box.size * 0.5f, delta.normalized, Hits, box.transform.rotation, delta.magnitude);
+
+            float minDst = float.MaxValue;
+            RaycastHit hit = default;
+            bool hasHit = false;
             for (int i = 0; i < hitCount; i++)
             {
-                RaycastHit hit = Hits[i];
-                if (!ShouldCollideWith(hit.collider))
-                    continue;
+                var h = Hits[i];
+                if (ShouldCollideWith(h.collider))
+                {
+                    float dst = h.distance;
+                    if (dst < minDst)
+                    {
+                        minDst = dst;
+                        hit = h;
+                        hasHit = true;
+                    }
+                }
+            }
 
+            if (!hasHit)
+            {
+                finalPos = end;
+                return false;
+            }
+            else
+            {
                 finalPos = start + delta.normalized * (hit.distance - REWIND);
                 return true;
             }
-
-            finalPos = end;
-            return false;
         }
         if (sph != null)
         {
             int hitCount = Physics.SphereCastNonAlloc(new Ray(start, delta.normalized), sph.radius, Hits, delta.magnitude);
+
+            float minDst = float.MaxValue;
+            RaycastHit hit = default;
+            bool hasHit = false;
             for (int i = 0; i < hitCount; i++)
             {
-                RaycastHit hit = Hits[i];
-                if (!ShouldCollideWith(hit.collider))
-                    continue;
+                var h = Hits[i];
+                if (ShouldCollideWith(h.collider))
+                {
+                    float dst = h.distance;
+                    if (dst < minDst)
+                    {
+                        minDst = dst;
+                        hit = h;
+                        hasHit = true;
+                    }
+                }
+            }
 
+            if (!hasHit)
+            {
+                finalPos = end;
+                return false;
+            }
+            else
+            {
                 finalPos = start + delta.normalized * (hit.distance - REWIND);
                 return true;
             }
-
-            finalPos = end;
-            return false;
         }
         if (cap != null)
         {
             var trs = cap.transform;
-            Vector3 pointA = trs.TransformPoint(cap.center - Vector3.up * (cap.height * 0.5f - cap.radius));
-            Vector3 pointB = trs.TransformPoint(cap.center + Vector3.up * (cap.height * 0.5f - cap.radius));
+            Vector3 pointA = start + trs.up * (cap.height * 0.5f - cap.radius);
+            Vector3 pointB = start - trs.up * (cap.height * 0.5f - cap.radius);
             int hitCount = Physics.CapsuleCastNonAlloc(pointA, pointB, cap.radius, delta.normalized, Hits, delta.magnitude);
+
+            float minDst = float.MaxValue;
+            RaycastHit hit = default;
+            bool hasHit = false;
             for (int i = 0; i < hitCount; i++)
             {
-                RaycastHit hit = Hits[i];
-                if (!ShouldCollideWith(hit.collider))
-                    continue;
-
-                finalPos = start + delta.normalized * (hit.distance - REWIND);
-                return true;
+                var h = Hits[i];
+                if (ShouldCollideWith(h.collider))
+                {
+                    float dst = h.distance;
+                    if(dst < minDst)
+                    {
+                        minDst = dst;
+                        hit = h;
+                        hasHit = true;
+                    }
+                }
             }
 
-            finalPos = end;
-            return false;
+            if (!hasHit)
+            {
+                finalPos = end;
+                return false;
+            }
+            else
+            {
+                finalPos = start + delta.normalized * (hit.distance - REWIND);
+                return true;
+            }            
         }
 
         Debug.LogError("Invalid collider type for sweep check!");
@@ -363,9 +535,10 @@ public class CustomCollisionResolver
         if(Collider is CapsuleCollider)
         {
             var cap = Collider as CapsuleCollider;
-            Vector3 pointA = trs.TransformPoint(cap.center - Vector3.up * (cap.height * 0.5f - cap.radius));
-            Vector3 pointB = trs.TransformPoint(cap.center + Vector3.up * (cap.height * 0.5f - cap.radius));
-            return Physics.OverlapCapsuleNonAlloc(pointA, pointB, cap.radius, overlaps);
+            Vector3 pointA = position + trs.up * (cap.height * 0.5f - cap.radius);
+            Vector3 pointB = position - trs.up * (cap.height * 0.5f - cap.radius);
+            int hits = Physics.OverlapCapsuleNonAlloc(pointA, pointB, cap.radius, overlaps);
+            return hits;
         }
 
         if (Collider is BoxCollider)
@@ -382,4 +555,23 @@ public class CustomCollisionResolver
 
         return 0;
     }
+}
+
+/// <summary>
+/// The method used to ensure that the distance moved is not greater than the overall intended linear distance.
+/// </summary>
+public enum ExtraDistanceResolveMode
+{
+    /// <summary>
+    /// No method is used. Depending on the world geometry, certain moves will travel further than intended.
+    /// </summary>
+    None,
+    /// <summary>
+    /// If the path becomes larger than intended, the path will end at the previous segment, which ensures that the distance travelled is always less but not necessarily exactly the same as intended.
+    /// </summary>
+    Truncate,
+    /// <summary>
+    /// If the path becomes larger than intended, the last segment in the path is adjusted to match the intended distance exactly. This may cause some issues with very complex or tight world geometry, but will generally work fine.
+    /// </summary>
+    Rewind
 }
