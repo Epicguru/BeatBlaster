@@ -483,8 +483,8 @@ public class CustomCollisionResolver
         if (cap != null)
         {
             var trs = cap.transform;
-            Vector3 pointA = start + trs.up * (cap.height * 0.5f - cap.radius);
-            Vector3 pointB = start - trs.up * (cap.height * 0.5f - cap.radius);
+            Vector3 pointA = start + trs.TransformVector(cap.center) + trs.up * (cap.height * 0.5f - cap.radius);
+            Vector3 pointB = start + trs.TransformVector(cap.center) - trs.up * (cap.height * 0.5f - cap.radius);
             int hitCount = Physics.CapsuleCastNonAlloc(pointA, pointB, cap.radius, delta.normalized, Hits, delta.magnitude);
 
             float minDst = float.MaxValue;
@@ -535,8 +535,8 @@ public class CustomCollisionResolver
         if(Collider is CapsuleCollider)
         {
             var cap = Collider as CapsuleCollider;
-            Vector3 pointA = position + trs.up * (cap.height * 0.5f - cap.radius);
-            Vector3 pointB = position - trs.up * (cap.height * 0.5f - cap.radius);
+            Vector3 pointA = position + trs.TransformVector(cap.center) + trs.up * (cap.height * 0.5f - cap.radius);
+            Vector3 pointB = position + trs.TransformVector(cap.center) - trs.up * (cap.height * 0.5f - cap.radius);
             int hits = Physics.OverlapCapsuleNonAlloc(pointA, pointB, cap.radius, overlaps);
             return hits;
         }

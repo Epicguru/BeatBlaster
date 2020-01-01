@@ -36,6 +36,10 @@ public class BaseMovement : MonoBehaviour
     public float RunSpeed = 14f;
     public float JumpVel = 4f;
 
+    [Header("Acceleration")]
+    public float MaxAccelerationForce = 1000f;
+    public float MaxDecelerationForce = 3000f;
+
     [Header("Grounding")]
     [Range(0f, 1f)]
     public float FeetDetectorScale = 0.9f;
@@ -51,17 +55,10 @@ public class BaseMovement : MonoBehaviour
     public float NoClipBoostSpeed = 15f;
 
     [Header("Runtime")]
-    public Vector3 ForcesVelocity = Vector3.zero;
-    public Vector3 GravityVelocity = Vector3.zero;
     public bool IsGrounded = false;
 
     [Header("Debug")]
     public bool DrawFeetDetector = true;
-
-    private void Awake()
-    {
-        Body.mass = 0f;
-    }
 
     private void FixedUpdate()
     {
@@ -83,13 +80,10 @@ public class BaseMovement : MonoBehaviour
         Collider.enabled = true;
 
         // Face downwards towards gravity.
-        transform.up = Gravity.sqrMagnitude < 0.001f ? Vector3.up : -Gravity;
+        //transform.up = Gravity.sqrMagnitude < 0.001f ? Vector3.up : -Gravity;
 
         // Update forces vel with current gravity;
-        if (!IsGrounded)
-            GravityVelocity += Gravity * Time.fixedDeltaTime;
-        else
-            GravityVelocity = Gravity.normalized * 0.5f;
+        AddForce(Physics.gravity * Body.mass, Color.green);
 
         if (!Collider.enabled)
             Collider.enabled = true;
@@ -107,22 +101,41 @@ public class BaseMovement : MonoBehaviour
         if (Input.GetKey(KeyCode.W))
             input.y += 1f;
 
-        if (IsGrounded && Input.GetKeyDown(KeyCode.Space))
-            AddJumpVelocity(JumpVel);
+        float generalSpeed = Input.GetKey(KeyCode.LeftShift) ? RunSpeed : BaseSpeed;
 
-        Vector3 worldDir = Vector3.zero;
-        worldDir += HeadYaw.right * input.x;
-        worldDir += HeadYaw.forward * input.y;
-        worldDir.Normalize();
+        float currentForwardSpeed = HeadYaw.InverseTransformVector(Body.velocity).z;
+        float currentHorizontalSpeed = HeadYaw.InverseTransformVector(Body.velocity).x;
 
-        float speed = Input.GetKey(KeyCode.LeftShift) ? RunSpeed : BaseSpeed;
+        float targetForwardSpeed = input.y * generalSpeed;
+        float targetHorizontalSpeed = input.x * generalSpeed;
 
-        Vector3 totalVel = worldDir * speed + GravityVelocity + ForcesVelocity;
+        float forwardDelta = targetForwardSpeed - currentForwardSpeed;
+        float horizontalDelta = targetHorizontalSpeed - currentHorizontalSpeed;
+        // URGTODO fix crossing the square problem; fast diagonal movement.
+        Vector3 forwardForce = HeadYaw.forward * (Mathf.Clamp(forwardDelta / (BaseSpeed * 0.5f), -1f, 1f) * (forwardDelta > 0f ? MaxAccelerationForce : MaxDecelerationForce));
+        Vector3 horizontalForce = HeadYaw.right * (Mathf.Clamp(horizontalDelta / (BaseSpeed * 0.5f), -1f, 1f) * (horizontalDelta > 0f ? MaxAccelerationForce : MaxDecelerationForce));
 
-        Body.velocity = totalVel;
+        AddForce(forwardForce, Color.blue);
+        AddForce(horizontalForce, Color.red);
+
+        DrawForceLine(HeadYaw.forward * currentForwardSpeed, Color.cyan);
+        DrawForceLine(HeadYaw.right * currentHorizontalSpeed, Color.magenta);
+
+        //Debug.Log($"Forward delta: {forwardDelta}");
 
         // Detect the ground...
         UpdateGroundInfo();
+    }
+
+    private void AddForce(Vector3 force, Color c)
+    {
+        Body.AddForce(force);
+        DrawForceLine(force * 0.01f, c);
+    }
+
+    private void DrawForceLine(Vector3 line, Color c)
+    {
+        Debug.DrawLine(transform.position, transform.position + line, c);
     }
 
     private void MoveNoClip()
@@ -160,11 +173,6 @@ public class BaseMovement : MonoBehaviour
         Vector3 offset = direction.normalized * speed * Time.fixedDeltaTime;
 
         transform.position += offset;
-    }
-
-    public void AddJumpVelocity(float length)
-    {
-        GravityVelocity = -Gravity.normalized * length;
     }
 
     public Vector3 GetFeetDetectorPosition()
