@@ -56,6 +56,7 @@ public class GunAnimator : MonoBehaviour
         }
         else
         {
+            IsChambering = false;
             Anim.ResetTrigger("Chamber");
         }
 
@@ -81,7 +82,9 @@ public class GunAnimator : MonoBehaviour
                     Anim.SetBool("Reload", true);
                 }
                 if (IsEmpty)
+                {
                     IsChambering = true;
+                }
             }
         }
         if (StopRecursiveReload)
@@ -102,7 +105,7 @@ public class GunAnimator : MonoBehaviour
                 Anim.SetTrigger("CheckMag");
             }
         }
-
+        
         bool run = Run;
         bool ads = ADS;
         bool crouch = Crouch;

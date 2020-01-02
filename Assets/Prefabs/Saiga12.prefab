@@ -578,7 +578,7 @@ LineRenderer:
   m_SortingOrder: 0
   m_Positions:
   - {x: -0.086799994, y: 1.4777999, z: 3.1303}
-  - {x: -0.08679954, y: 1.4778001, z: 0.43399858}
+  - {x: -0.08678313, y: 1.4778084, z: -96.86979}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.01
@@ -1601,7 +1601,7 @@ MonoBehaviour:
   BulletPathRandomness: {x: 0, y: 0.06}
   ADSZoom: 1.25
   MagazineCapacity: 10
-  RPM: 400
+  RPM: 350
   SpawnUponShoot: 0
   ShellPrefab: {fileID: 735560492913985307, guid: a09f9553113179140b10a166d9a2c7ee,
     type: 3}

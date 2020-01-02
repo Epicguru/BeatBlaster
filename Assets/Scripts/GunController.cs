@@ -20,6 +20,7 @@ public class GunController : MonoBehaviour
     [Header("Core")]
     public bool InvertSlideBehaviour = false;
     public bool IsRecursiveReload = false;
+    public bool IsAutoChamber = true;
 
     [Header("References")]
     public PlayerController Player;
@@ -86,7 +87,7 @@ public class GunController : MonoBehaviour
                 {
                     if (Input.GetKeyDown(KeyCode.Mouse0) && BulletInChamber)
                     {
-                        if (IsRecursiveReload && CurrentBullets == 0)
+                        if ((IsRecursiveReload || !IsAutoChamber) && CurrentBullets == 0)
                             BulletInChamber = false;
                         Anim.Shoot = true;
                         shootTimer = 0f;
@@ -99,7 +100,7 @@ public class GunController : MonoBehaviour
                 {
                     if (Input.GetKey(KeyCode.Mouse0) && (BulletInChamber || (IsRecursiveReload && Anim.IsReloading)))
                     {
-                        if (IsRecursiveReload && CurrentBullets == 0)
+                        if ((IsRecursiveReload || !IsAutoChamber) && CurrentBullets == 0)
                             BulletInChamber = false;
                         Anim.Shoot = true;
                         shootTimer = 0f;
@@ -109,8 +110,8 @@ public class GunController : MonoBehaviour
         }
 
         Anim.ADS = Input.GetKey(KeyCode.Mouse1);
-        Anim.Run = Input.GetKey(KeyCode.LeftShift);
-        Anim.Crouch = Input.GetKey(KeyCode.C);
+        Anim.Run = Player.IsRunning;
+        Anim.Crouch = Player.IsCrouching;
 
         if (!BulletInChamber && CurrentBullets > 0 && !Anim.IsChambering)
         {
@@ -146,7 +147,7 @@ public class GunController : MonoBehaviour
                 break;
 
             case "shoot":
-                if (!BulletInChamber && !IsRecursiveReload)
+                if (!BulletInChamber && !IsRecursiveReload && IsAutoChamber)
                 {
                     Debug.LogError("Animation-CodeState desync.");
                     break;
@@ -166,7 +167,7 @@ public class GunController : MonoBehaviour
 
                 BulletInChamber = false;
 
-                if (!IsRecursiveReload && CurrentBullets > 0)
+                if (!IsRecursiveReload && CurrentBullets > 0 && IsAutoChamber)
                 {
                     CurrentBullets--;
                     BulletInChamber = true;

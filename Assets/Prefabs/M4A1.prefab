@@ -812,6 +812,8 @@ MonoBehaviour:
     type: 3}
   Muzzle: {fileID: 1252871491}
   MuzzleVelocity: 700
+  BulletsPerShot: 1
+  BulletPathRandomness: {x: 0, y: 0}
   ADSZoom: 1.5
   MagazineCapacity: 30
   RPM: 700
@@ -1320,7 +1322,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8656735182542079819
 Transform:
   m_ObjectHideFlags: 0

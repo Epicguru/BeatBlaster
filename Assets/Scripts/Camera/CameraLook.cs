@@ -9,6 +9,7 @@ public class CameraLook : MonoBehaviour
 
     [Header("Controls")]
     public float MouseSensitivity = 1f;
+    public float InternalSens = 1f;
     public bool CaptureMouse = true;
 
     private float horizontalLook;
@@ -16,8 +17,8 @@ public class CameraLook : MonoBehaviour
 
     private void Update()
     {
-        horizontalLook += Input.GetAxisRaw("Mouse X") * MouseSensitivity;
-        verticalLook -= Input.GetAxisRaw("Mouse Y") * MouseSensitivity;
+        horizontalLook += Input.GetAxisRaw("Mouse X") * MouseSensitivity * InternalSens;
+        verticalLook -= Input.GetAxisRaw("Mouse Y") * MouseSensitivity * InternalSens;
         verticalLook = Mathf.Clamp(verticalLook, -90f, 90f);
 
         Yaw.localEulerAngles = new Vector3(0f, horizontalLook, 0f);

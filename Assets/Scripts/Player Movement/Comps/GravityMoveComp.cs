@@ -5,10 +5,14 @@ public class GravityMoveComp : CharacterMovementComponent
 {
     public Vector3 GravityVel = Vector3.zero;
 
+    public WallRunComp WallRun;
+
     public override Vector3 MoveUpdate(CustomCharacterController controller)
     {
-        GravityVel += Time.deltaTime * controller.Gravity;
-        if (controller.IsGrounded)
+        if(!(WallRun?.IsWallRunning ?? false))
+            GravityVel += Time.deltaTime * controller.Gravity;
+
+        if (controller.IsGrounded && !(WallRun?.IsWallRunning ?? false))
             GravityVel = controller.HeadYaw.up * -1f;
 
         return Vector3.zero;

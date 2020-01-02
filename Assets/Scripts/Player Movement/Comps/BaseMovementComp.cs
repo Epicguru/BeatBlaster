@@ -8,7 +8,7 @@ public class BaseMovementComp : CharacterMovementComponent
 
     public override Vector3 MoveUpdate(CustomCharacterController controller)
     {
-        if (!controller.IsFlying)
+        if (controller.IsGrounded && (!GetComponent<WallRunComp>()?.IsWallRunning ?? true))
         {
             CurrentVel = Vector3.zero; Vector3 inputRaw = Vector3.zero;
 

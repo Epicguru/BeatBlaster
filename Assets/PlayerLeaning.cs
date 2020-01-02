@@ -13,6 +13,7 @@ public class PlayerLeaning : MonoBehaviour
     }
     private PlayerController _pc;
     public Transform OffsetTransform;
+    public Transform IndependentOffsetTransform;
     public Transform AngleTransform;
 
     [Header("Control")]
@@ -24,6 +25,8 @@ public class PlayerLeaning : MonoBehaviour
 
     [Header("Timing")]
     public float LeanOffset = 0.1f;
+    public Vector2 LeanIdependentOffset = new Vector2(-0.2f, 0.2f);
+    public Vector2 LeanIdependentOffsetCrouch = new Vector2(-0.1f, 0.1f);
     public float LeanAngle = 20f;
 
     public bool Left, Right;
@@ -93,7 +96,21 @@ public class PlayerLeaning : MonoBehaviour
         float angle = Mathf.Lerp(LeanAngle, -LeanAngle, lerp);
         float offset = Mathf.Lerp(-LeanOffset, LeanOffset, lerp);
 
+        float indLerp = 2f * (lerp - 0.5f);
+        float indOffset = 0f;
+        float adsLerp = PlayerController.Gun?.ADSLerp ?? 0f;
+        float crouchLerp = PlayerController.CC.RealCrouchLerp;
+        if(indLerp > 0f)
+        {
+            indOffset = Mathf.Lerp(Mathf.Lerp(0f, LeanIdependentOffset.y, indLerp * (1f - adsLerp)), Mathf.Lerp(0f, LeanIdependentOffsetCrouch.y, indLerp * (1f - adsLerp)), crouchLerp);
+        }
+        else if(indLerp < 0f)
+        {
+            indOffset = Mathf.Lerp(Mathf.Lerp(0f, LeanIdependentOffset.x, -indLerp * (1f - adsLerp)), Mathf.Lerp(0f, LeanIdependentOffsetCrouch.x, -indLerp * (1f - adsLerp)), crouchLerp);
+        }
+
         AngleTransform.localEulerAngles = new Vector3(0f, 0f, angle);
+        IndependentOffsetTransform.localPosition = new Vector3(indOffset, 0f, 0f);
         OffsetTransform.localPosition = new Vector3(offset, 0f, 0f);
     }
 }

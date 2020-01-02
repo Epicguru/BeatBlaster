@@ -145,7 +145,7 @@ public class CustomCharacterController : MonoBehaviour
     {
         if (!CanStand)
         {
-            RealCrouchLerp = Mathf.MoveTowards(RealCrouchLerp, 1f, Time.deltaTime * 10f);
+            RealCrouchLerp = 0f;
         }
         else
         {

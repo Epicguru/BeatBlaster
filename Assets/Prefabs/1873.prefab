@@ -1490,6 +1490,8 @@ MonoBehaviour:
     type: 3}
   Muzzle: {fileID: 591806317}
   MuzzleVelocity: 450
+  BulletsPerShot: 1
+  BulletPathRandomness: {x: 0, y: 0}
   ADSZoom: 1.5
   MagazineCapacity: 5
   RPM: 600

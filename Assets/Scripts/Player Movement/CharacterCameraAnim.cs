@@ -16,7 +16,7 @@ public class CharacterCameraAnim : MonoBehaviour
 
     public Animator Anim;
     public PowerSlideComp SlideComp;
-    public JumpMoveComp JumpComp;
+    public JumpComp JumpComp;
 
     private void Awake()
     {
