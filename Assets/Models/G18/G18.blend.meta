@@ -3,7 +3,62 @@ guid: 106249e1f05e1e54c90246fb83d022bd
 ModelImporter:
   serializedVersion: 27
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Barrel Mat
+    second: {fileID: 2100000, guid: 0c84ba54c0bac6a41a9f16e1bbc0be01, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Body Mat
+    second: {fileID: 2100000, guid: bf5db936706ad8349996e178b8cac065, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cover Metal
+    second: {fileID: 2100000, guid: e3acf0cf74a69a84781d3b0d9497f94f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Laser Light Dark
+    second: {fileID: 2100000, guid: 0a50d257b52d473489193777602dc520, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Mag Mat
+    second: {fileID: 2100000, guid: 80fb53c9069f99f47b0a50c11e760608, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Mag Mat.002
+    second: {fileID: 2100000, guid: 779e803fbdc7d1542a2e32fe01b2e6d7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: No Name
+    second: {fileID: 2100000, guid: 7794d53735f0ac64fb35517b30d7f783, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sights Mat
+    second: {fileID: 2100000, guid: 6cbc2016ed28ee54f93d40e222a66e59, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Slide Mat
+    second: {fileID: 2100000, guid: 2a410afab4be30649b64a81ada434369, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Stock Black
+    second: {fileID: 2100000, guid: 893574b0e9e8728409a2a8a254087944, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Suppressor Black
+    second: {fileID: 2100000, guid: 07850580b2192444486270c6755fc315, type: 2}
   materials:
     importMaterials: 1
     materialName: 0
@@ -68,7 +123,7 @@ ModelImporter:
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
   referencedClips: []
-  importAnimation: 1
+  importAnimation: 0
   humanDescription:
     serializedVersion: 3
     human: []
