@@ -10,6 +10,10 @@ public class GunAnimator : MonoBehaviour
     public Vector2 ADSTimes = new Vector2(0.15f, 0.2f);
     public Vector2 CrouchTimes = new Vector2(0.15f, 0.2f);
 
+    [Header("Sway")]
+    public float NormalSwayMultiplier = 1f;
+    public float ADSSwayMultiplier = 0.1f;
+
     [Header("Controls")]
     public bool IsRecursiveReload = false;
     public bool Run = false;

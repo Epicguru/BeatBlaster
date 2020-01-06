@@ -1,4 +1,6 @@
 ﻿
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -7,6 +9,7 @@ using UnityEngine.Events;
 /// Intended as a drop-in replacement for the standard CharacterController, which lacks key features such as variable gravity or player tilt.
 /// </summary>
 [RequireComponent(typeof(CapsuleCollider))]
+[RequireComponent(typeof(Rigidbody))]
 public class CustomCharacterController : MonoBehaviour
 {
     private static Collider[] Overlaps = new Collider[64];
@@ -21,23 +24,24 @@ public class CustomCharacterController : MonoBehaviour
         }
     }
     private CapsuleCollider _collider;
-
-    public CustomCollisionResolver Resolver { get; private set; }
+    public Rigidbody Body
+    {
+        get
+        {
+            if (_body == null)
+                _body = GetComponent<Rigidbody>();
+            return _body;
+        }
+    }
+    private Rigidbody _body;
 
     [Header("References")]
     public Transform Head;
     public Transform HeadYaw;
 
-    [Header("Collider")]
-    public bool ColliderIsTrigger = true;
-
     [Header("Movement Settings")]
     public float BaseSpeed = 8f;
     public float RunSpeed = 14f;
-    [Range(0f, 1f)]
-    public float AdditionalForcesDecay = 0.95f;
-    [Range(1, 200)]
-    public int AdditionalForcesDecayTickRate = 120;
 
     [Header("Crouching")]
     public float CrouchSpeed = 4f;
@@ -52,15 +56,11 @@ public class CustomCharacterController : MonoBehaviour
     public float FeetDetectorScale = 0.9f;
     [Range(0f, 0.5f)]
     public float FeetDetectorOffset = 0.05f;
+    public float AirDrag = 0.05f, GroundDrag = 5f;
 
     [Header("Jumping")]
-    public float JumpVel = 4f;
     [Range(0, 100)]
     public int MaxAirJumps = 1;
-
-    [Header("Leaping")]
-    public float LeapVel = 15f;
-    public float LeapLiftVel = 9f;
 
     [Header("Gravity")]
     public Vector3 Gravity = new Vector3(0f, -9.81f, 0f);
@@ -75,48 +75,60 @@ public class CustomCharacterController : MonoBehaviour
     /// <summary>
     /// Is the controller currently moving through the air with no contact or collisions?
     /// </summary>
-    public bool IsFlying = false;
     public int JumpsInAir = 0;
     [Range(0f, 1f)]
     public float RealCrouchLerp = 0f;
     public bool CanStand = true;
-    public Vector3 CurrentTargetVelocity { get; private set; }
     public Vector3 CurrentRealVelocity { get; private set; }
 
-    [Header("Other")]
-    public ExtraDistanceResolveMode DistanceResolveMode = ExtraDistanceResolveMode.Rewind;
-    public AnimationCurve SurfaceAngleDistanceCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
-    public float FastResolveDepth = 0.02f;
+    public bool IsRunning { get; set; }
+    public bool IsCrouching { get; private set; }
+
     public UnityAction OnLeaveGround;
     public UnityAction OnEnterGround;
 
     [Header("Debug")]
     public bool DrawFeetDetector = true;
-    public bool DrawMoveDebug = false;
-
-    private bool lastFrameGrounded = false;
 
     private CharacterMovementComponent[] comps;
+    [NonSerialized]
+    internal Dictionary<Type, CharacterMovementComponent> compsDict = new Dictionary<Type, CharacterMovementComponent>();
 
     private void Awake()
     {
-        Resolver = new CustomCollisionResolver(Collider);
-        Resolver.FastResolveDepth = Resolver.RecommendedFastResolveDepth;
-        Resolver.SurfaceAngleDistanceCurve = SurfaceAngleDistanceCurve;
-
         comps = GetComponents<CharacterMovementComponent>();
         comps = comps.OrderBy((c) => { return c.Order; }).ToArray();
+        foreach (var comp in comps)
+        {
+            compsDict.Add(comp.GetType(), comp);
+        }
     }
 
     private void Update()
     {
-        Resolver.DrawDebug = DrawMoveDebug;
-        Resolver.DistanceCheckMode = DistanceResolveMode;
-        Resolver.FastResolveDepth = FastResolveDepth;
-
         if (Input.GetKeyDown(KeyCode.N))
             NoClip = !NoClip;
 
+        if (IsGrounded)
+        {
+            TargetCrouchLerp = Input.GetKey(KeyCode.C) ? 1f : 0f;
+        }
+        else
+        {
+            TargetCrouchLerp = 0f;
+        }
+
+        foreach (var c in comps)
+        {
+            if (c != null && c.enabled)
+            {
+                c.MoveUpdate(this);
+            }
+        }
+    }
+
+    private void FixedUpdate()
+    {
         if (NoClip)
         {
             MoveNoClip();
@@ -125,19 +137,9 @@ public class CustomCharacterController : MonoBehaviour
         {
             UpdateCrouching();
             MoveRegular();
-
-            if(lastFrameGrounded != IsGrounded)
-            {
-                lastFrameGrounded = IsGrounded;
-                if (IsGrounded)
-                {
-                    OnEnterGround?.Invoke();
-                }
-                else
-                {
-                    OnLeaveGround?.Invoke();
-                }
-            }
+            UpdateGroundInfo();
+            UpdateHeadInfo();
+            UpdateDrag();
         }
     }
 
@@ -149,13 +151,21 @@ public class CustomCharacterController : MonoBehaviour
         }
         else
         {
-            RealCrouchLerp = Mathf.MoveTowards(RealCrouchLerp, TargetCrouchLerp, Time.deltaTime * CrouchSpeed);
+            RealCrouchLerp = Mathf.MoveTowards(RealCrouchLerp, TargetCrouchLerp, Time.fixedDeltaTime * CrouchSpeed);
         }
 
         float lerp = RealCrouchLerp;
         Collider.height = Mathf.Lerp(RegularHeight, CrouchHeight, lerp);
         Collider.center = Vector3.Lerp(Vector3.zero, new Vector3(0f, (RegularHeight - CrouchHeight) * -0.5f, 0f), lerp);
         HeadYaw.localPosition = new Vector3(0f, Mathf.Lerp(CameraHeights.x, CameraHeights.y, lerp), 0f);
+    }
+
+    private void UpdateDrag()
+    {
+        if (IsGrounded)
+            Body.drag = GroundDrag;
+        else
+            Body.drag = AirDrag;
     }
 
     private void MoveRegular()
@@ -167,17 +177,8 @@ public class CustomCharacterController : MonoBehaviour
         const float MAX_SPEED_ANGLE = 180f;
         Quaternion target = Quaternion.LookRotation(Vector3.forward, -Gravity);
         float p = Mathf.Clamp01(Quaternion.Angle(transform.localRotation, target) / MAX_SPEED_ANGLE);
-        float angleSpeed = Mathf.Lerp(MIN_SPEED, MAX_SPEED, p);
-        transform.localRotation = Quaternion.RotateTowards(transform.localRotation, target, angleSpeed * Time.deltaTime);
-
-        if (IsGrounded)
-        {
-            TargetCrouchLerp = Input.GetKey(KeyCode.C) ? 1f : 0f;
-        }
-        else
-        {
-            TargetCrouchLerp = 0f;
-        }
+        float angleSpeed = Mathf.Lerp(MIN_SPEED, MAX_SPEED, p);        
+        Body.MoveRotation(Quaternion.RotateTowards(transform.localRotation, target, angleSpeed * Time.fixedDeltaTime));
 
         // Update jumps in air variable.
         if (IsGrounded)
@@ -185,54 +186,22 @@ public class CustomCharacterController : MonoBehaviour
             JumpsInAir = 0;
         }
 
-        if(Collider.isTrigger != ColliderIsTrigger)
-            Collider.isTrigger = ColliderIsTrigger;
-
         Vector3 offset = Vector3.zero;
-        CurrentTargetVelocity = Vector3.zero;
-        foreach (var c in comps)
-        {
-            if(c != null && c.enabled)
-            {
-                var vel = c.MoveUpdate(this);
-                offset += vel;
-                CurrentTargetVelocity += vel;
-            }
-        }
         foreach (var c in comps)
         {
             if (c != null && c.enabled)
             {
-                var vel = c.MoveLateUpdate(this);
+                var vel = c.MoveFixedUpdate(this);
                 offset += vel;
-                CurrentTargetVelocity += vel;
+                Debug.DrawLine(Body.position, Body.position + vel * 0.1f, c.DebugColor);
             }
         }
-        offset *= Time.deltaTime;
+        offset *= Time.fixedDeltaTime;
 
-        if (DrawMoveDebug)
-        {
-            Debug.DrawLine(transform.position, transform.position + offset, Color.black);
-            Debug.DrawLine(transform.position + offset, transform.position + offset + Vector3.up * 0.01f, Color.black);
-        }
-
-        var result = Resolver.ResolveFast(transform.position, transform.position + offset);
-        if (!result.HasError)
-        {
-            CurrentRealVelocity = (result.FinalPosition - transform.position) / Time.deltaTime; // Very rough value because of changing delta time.
-            transform.position = result.FinalPosition;
-            IsFlying = result.NoCollisions;
-        }
-        else
-        {
-            Debug.LogWarning(result.Error);
-        }
-
-        // Detect the ground...
-        UpdateGroundInfo();
-
-        // Detect the head overlapping.
-        UpdateHeadInfo();
+        Vector3 oldPos = Body.position;
+        Vector3 targetPos = Body.position + offset;
+        Body.MovePosition(targetPos);
+        CurrentRealVelocity = (Body.position - oldPos) / Time.fixedDeltaTime; // Should give fairly accurate velocity due to fixed delta time.
     }
 
     private void MoveNoClip()
@@ -273,6 +242,7 @@ public class CustomCharacterController : MonoBehaviour
 
     private void UpdateGroundInfo()
     {
+        bool old = IsGrounded;
         IsGrounded = false;
 
         int hits = Physics.OverlapSphereNonAlloc(GetFeetDetectorPosition(), GetFeetDetectorRadius(), Overlaps);
@@ -283,6 +253,19 @@ public class CustomCharacterController : MonoBehaviour
             {
                 IsGrounded = true;
                 break;
+            }
+        }
+
+        if (old != IsGrounded)
+        {
+            if (IsGrounded)
+            {
+                OnEnterGround?.Invoke();
+            }
+            else
+            {
+                OnLeaveGround?.Invoke();
+                Body.velocity = CurrentRealVelocity;
             }
         }
     }
@@ -330,6 +313,38 @@ public class CustomCharacterController : MonoBehaviour
     public float GetHeadDetectorRadius()
     {
         return Collider.radius * 0.95f;
+    }
+
+    public float GetDirectionalVelocity(Vector3 axis)
+    {
+        var worldVel = Body.velocity;
+        var localVel = HeadYaw.InverseTransformVector(worldVel);
+
+        Vector3 axisThing = new Vector3(localVel.x * axis.x, localVel.y * axis.y, localVel.z * axis.z);
+
+        return axisThing.magnitude;
+    }
+
+    public void SetDirectionalVelocity(Vector3 localAxis)
+    {
+        Vector3 world = HeadYaw.TransformVector(localAxis);
+        Vector3 newVel = Body.velocity;
+
+        const float DEADZONE = 0.01f;
+        if(Mathf.Abs(world.x) > DEADZONE)
+        {
+            newVel.x = world.x;
+        }
+        if (Mathf.Abs(world.y) > DEADZONE)
+        {
+            newVel.y = world.y;
+        }
+        if (Mathf.Abs(world.z) > DEADZONE)
+        {
+            newVel.z = world.z;
+        }
+
+        Body.velocity = newVel;
     }
 
     private void OnDrawGizmosSelected()

@@ -9,39 +9,37 @@ public class JumpComp : CharacterMovementComponent
 
     public UnityAction OnJump;
 
-    private GravityMoveComp gravity;
-    private WallRunComp wallRun;
+    private bool jumpPending = false;
 
-    private void Awake()
+    public override void MoveUpdate(CustomCharacterController c)
     {
-        gravity = GetComponent<GravityMoveComp>();
-        wallRun = GetComponent<WallRunComp>();
+        bool canJump = c.IsGrounded || c.JumpsInAir < c.MaxAirJumps;
+
+        if(canJump && Input.GetKeyDown(Key))
+        {
+            jumpPending = true;
+            OnJump?.Invoke();
+            if(!c.IsGrounded)
+                c.JumpsInAir++;
+        }
     }
 
-    public override Vector3 MoveUpdate(CustomCharacterController controller)
+    public override Vector3 MoveFixedUpdate(CustomCharacterController c)
     {
-        if(controller.IsGrounded && Input.GetKeyDown(Key))
-        {
-            gravity.GravityVel = controller.HeadYaw.up * JumpVel;
-            OnJump?.Invoke();
-        }
+        if (!jumpPending)
+            return Vector3.zero;
 
-        if(!controller.IsGrounded && Input.GetKeyDown(Key) && controller.JumpsInAir < controller.MaxAirJumps)
+        if (c.IsGrounded)
         {
-            gravity.GravityVel = controller.HeadYaw.up * JumpVel;
-            controller.JumpsInAir++;
-            OnJump?.Invoke();
+            //jumpPending = false;
+            return -c.Gravity.normalized * JumpVel;
         }
-
-        if(wallRun != null && wallRun.IsWallRunning)
+        else
         {
-            if (Input.GetKeyDown(Key))
-            {
-                gravity.GravityVel = controller.HeadYaw.up * JumpVel * 1.5f + (wallRun.IsRightWall ? wallRun.rightNormal : wallRun.leftNormal) * 9f + controller.HeadYaw.forward * 6f;
-                OnJump?.Invoke();
-            }
+            jumpPending = false;
+            //OnJump?.Invoke();
+            c.SetDirectionalVelocity(Vector3.up * JumpVel);
+            return Vector3.zero;
         }
-
-        return Vector3.zero;
     }
 }

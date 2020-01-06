@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 311576564}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Muzzle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41,7 +41,7 @@ GameObject:
   - component: {fileID: 1911651897}
   - component: {fileID: 1911651899}
   - component: {fileID: 1911651898}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Line
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -187,7 +187,7 @@ GameObject:
   - component: {fileID: 8480755764126099245}
   - component: {fileID: 6904113249679149716}
   - component: {fileID: 5478031629896096682}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Trigger 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -266,7 +266,7 @@ GameObject:
   - component: {fileID: 1982703293141792381}
   - component: {fileID: 173584791310449248}
   - component: {fileID: 8304455037259380911}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Laser-Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -347,7 +347,7 @@ GameObject:
   - component: {fileID: 3704018889759522635}
   - component: {fileID: 8855002346963465494}
   - component: {fileID: 6548619117289115916}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Fire Mode Selector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -426,7 +426,7 @@ GameObject:
   - component: {fileID: 2126632539768159076}
   - component: {fileID: 5710121704264604319}
   - component: {fileID: 8090366755808209955}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -516,7 +516,7 @@ GameObject:
   - component: {fileID: 3776328071666673914}
   - component: {fileID: 4837112327198015404}
   - component: {fileID: 4416722440011723096}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Huge Mag
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -595,7 +595,7 @@ GameObject:
   - component: {fileID: 5214377106989883419}
   - component: {fileID: 482870144}
   - component: {fileID: 1070381114097908702}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Glock 18
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -633,6 +633,8 @@ MonoBehaviour:
   Anim: {fileID: 8296172668110058506}
   ADSTimes: {x: 0.15, y: 0.2}
   CrouchTimes: {x: 0.15, y: 0.2}
+  NormalSwayMultiplier: 1
+  ADSSwayMultiplier: 0.1
   IsRecursiveReload: 0
   Run: 0
   ADS: 0
@@ -668,7 +670,7 @@ MonoBehaviour:
   AudioClips: []
   Offset: {x: 0, y: 0, z: 0}
   CameraAnim: {fileID: 0}
-  FireMode: 0
+  FireMode: 1
   ProjectilePrefab: {fileID: 3499221662400414245, guid: 45c92f52494646d4593084729dce09de,
     type: 3}
   Muzzle: {fileID: 311576564}
@@ -676,7 +678,7 @@ MonoBehaviour:
   BulletsPerShot: 1
   BulletPathRandomness: {x: 0, y: 0}
   ADSZoom: 1.25
-  MagazineCapacity: 17
+  MagazineCapacity: 50
   RPM: 950
   SpawnUponShoot: 1
   ShellPrefab: {fileID: 4232246883091812776, guid: 49284d89de217a542b7f613884a8eb73,
@@ -689,7 +691,7 @@ MonoBehaviour:
   ShootPunchRoll: {x: -30, y: 30}
   HipfirePunchMultiplier: {x: 2, y: 2, z: 2}
   BulletInChamber: 0
-  CurrentBullets: 17
+  CurrentBullets: 50
 --- !u!1 &2576111684334626469
 GameObject:
   m_ObjectHideFlags: 0
@@ -701,7 +703,7 @@ GameObject:
   - component: {fileID: 6719590298147463826}
   - component: {fileID: 4760200319327727128}
   - component: {fileID: 5188886633422478154}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Default Magazine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -781,7 +783,7 @@ GameObject:
   - component: {fileID: 2593956062617391063}
   - component: {fileID: 8296172668110058506}
   - component: {fileID: 5888689180530692763}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Graphics
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -864,7 +866,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6391283703359137724}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Shell Spawn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -896,7 +898,7 @@ GameObject:
   - component: {fileID: 2842525545754598551}
   - component: {fileID: 5420725537422378287}
   - component: {fileID: 1869124003160666582}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Suppressor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -973,7 +975,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5827227311141577337}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Magazine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1008,7 +1010,7 @@ GameObject:
   - component: {fileID: 5827227311459322605}
   - component: {fileID: 5827227311459322606}
   - component: {fileID: 5827227311459322607}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Right Hand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1087,7 +1089,7 @@ GameObject:
   - component: {fileID: 5827227312559724226}
   - component: {fileID: 5827227312559724284}
   - component: {fileID: 5827227312559724285}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Left Hand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1166,7 +1168,7 @@ GameObject:
   - component: {fileID: 7563174841433251534}
   - component: {fileID: 8104791996710297272}
   - component: {fileID: 3227597037020319292}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Stock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1245,7 +1247,7 @@ GameObject:
   - component: {fileID: 3092690722973041208}
   - component: {fileID: 5448916177559444131}
   - component: {fileID: 1748398693089964169}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Port Cover
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1324,7 +1326,7 @@ GameObject:
   - component: {fileID: 7836090384558910760}
   - component: {fileID: 8121470740308878636}
   - component: {fileID: 1386601533630767846}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Slide
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1406,7 +1408,7 @@ GameObject:
   - component: {fileID: 2313302823597280881}
   - component: {fileID: 8127273229904864028}
   - component: {fileID: 3027994191691954253}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Trigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1486,7 +1488,7 @@ GameObject:
   - component: {fileID: 2734945321678583421}
   - component: {fileID: 2425317814931888515}
   - component: {fileID: 317215605920872039}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Barrel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1566,7 +1568,7 @@ GameObject:
   - component: {fileID: 4271243932184858311}
   - component: {fileID: 8436205101860870120}
   - component: {fileID: 2516179151327050637}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Big Mag
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1645,7 +1647,7 @@ GameObject:
   - component: {fileID: 5654536906514869598}
   - component: {fileID: 5884643246227408664}
   - component: {fileID: 1489379167826274982}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: RMR
   m_TagString: Untagged
   m_Icon: {fileID: 0}

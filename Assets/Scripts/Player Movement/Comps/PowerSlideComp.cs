@@ -11,37 +11,41 @@ public class PowerSlideComp : CharacterMovementComponent
 
     [Header("Runtime")]
     public float AdditionalVel = 0f;
+    public bool IsInSlide = false;
 
     public UnityAction OnSlideStart;
     private float timer = 0f;
 
-    public override Vector3 MoveUpdate(CustomCharacterController controller)
+    public override void MoveUpdate(CustomCharacterController controller)
     {
         timer -= Time.deltaTime;
         if (timer < 0f)
             timer = 0f;
 
-        bool isRunning = Input.GetKey(KeyCode.LeftShift);
+        bool isRunning = controller.IsRunning;
 
-        if(controller.IsGrounded && isRunning && controller.RealCrouchLerp < 0.4f && Input.GetKeyDown(KeyCode.C))
+        if(controller.IsGrounded && isRunning && !controller.IsCrouching && Input.GetKeyDown(KeyCode.C))
         {
             // Crouch has just started while running. Powerslide time!
             timer = MinSlideDuration;
             AdditionalVel = BaseSpeedAddition;
-
+            IsInSlide = true;
             OnSlideStart?.Invoke();
-
         }
 
         if(timer > 0f)
         {
             controller.TargetCrouchLerp = 1f;
+            IsInSlide = false;
         }
 
         AdditionalVel -= SpeedDecayRate * Time.deltaTime;
         if (AdditionalVel < 0f)
             AdditionalVel = 0f;
+    }
 
-        return controller.HeadYaw.forward * AdditionalVel;
+    public override Vector3 MoveFixedUpdate(CustomCharacterController c)
+    {
+        return c.HeadYaw.forward * AdditionalVel;
     }
 }

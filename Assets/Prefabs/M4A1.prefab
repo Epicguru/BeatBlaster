@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 307706028}
   - component: {fileID: 307706030}
   - component: {fileID: 307706029}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Right Hand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -88,7 +88,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1252871491}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Muzzle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -118,7 +118,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1534218534}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Shell Spawn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -150,7 +150,7 @@ GameObject:
   - component: {fileID: 1576865552}
   - component: {fileID: 1576865554}
   - component: {fileID: 1576865553}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Left Hand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -227,7 +227,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1959431544}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Camera Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -259,7 +259,7 @@ GameObject:
   - component: {fileID: 5220323001951161585}
   - component: {fileID: 5489430449349206799}
   - component: {fileID: 7629330532618374379}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Barrel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -339,7 +339,7 @@ GameObject:
   - component: {fileID: 9073183410412591321}
   - component: {fileID: 8203465589795892284}
   - component: {fileID: 367818496310788278}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Rails
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -418,7 +418,7 @@ GameObject:
   - component: {fileID: 5592532795134162173}
   - component: {fileID: 2112176862898182544}
   - component: {fileID: 5153159175175635649}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Trigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -497,7 +497,7 @@ GameObject:
   - component: {fileID: 2856506790007692033}
   - component: {fileID: 1967240742751791295}
   - component: {fileID: 8326268537959444783}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Right Tube Detail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -545,7 +545,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: b03c863247425ad4ca57f185e4acac8d, type: 2}
-  - {fileID: 2100000, guid: bd1f40893d81911429367947aa02d358, type: 2}
+  - {fileID: 2100000, guid: 72b62895ba410d8488aa2ad4d85dceea, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -577,7 +577,7 @@ GameObject:
   - component: {fileID: 1439840181059056393}
   - component: {fileID: 4863555523156476955}
   - component: {fileID: 5820032716544063415}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Fire Selector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -656,7 +656,7 @@ GameObject:
   - component: {fileID: 1160445714018402856}
   - component: {fileID: 3273651339364052890}
   - component: {fileID: 7644958299936038426}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -735,7 +735,7 @@ GameObject:
   - component: {fileID: 2131957276071980662}
   - component: {fileID: 4420373222677369694}
   - component: {fileID: 4420373222677369693}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: M4A1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -773,6 +773,8 @@ MonoBehaviour:
   Anim: {fileID: 599685442}
   ADSTimes: {x: 0.15, y: 0.2}
   CrouchTimes: {x: 0.15, y: 0.2}
+  NormalSwayMultiplier: 1
+  ADSSwayMultiplier: 0.1
   IsRecursiveReload: 0
   Run: 0
   ADS: 0
@@ -824,6 +826,8 @@ MonoBehaviour:
   ShellSpawn: {fileID: 1534218534}
   MinShellVel: {x: 1, y: 0.8, z: 0}
   MaxShellVel: {x: 1.5, y: 0.9, z: 0}
+  MuzzleFlashPrefab: {fileID: 5800419527205165590, guid: d5298e82326ab13438b126574a600428,
+    type: 3}
   ShootPunchPitch: {x: 20, y: 25}
   ShootPunchYaw: {x: -30, y: 30}
   ShootPunchRoll: {x: -130, y: 130}
@@ -841,7 +845,7 @@ GameObject:
   - component: {fileID: 6842467687755700409}
   - component: {fileID: 5191516013492371471}
   - component: {fileID: 763031558329096390}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Buffer Tube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -921,7 +925,7 @@ GameObject:
   - component: {fileID: 2092720510791832502}
   - component: {fileID: 6473510881682905625}
   - component: {fileID: 3012999150429040680}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Handguard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1001,7 +1005,7 @@ GameObject:
   - component: {fileID: 3652854452672938164}
   - component: {fileID: 1195186858902122910}
   - component: {fileID: 781217315684072863}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Chamber Block
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1080,7 +1084,7 @@ GameObject:
   - component: {fileID: 392905160316281922}
   - component: {fileID: 2160649451428226100}
   - component: {fileID: 4705294301010998448}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Stock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1159,7 +1163,7 @@ GameObject:
   - component: {fileID: 2452805886252130520}
   - component: {fileID: 7061300380557644831}
   - component: {fileID: 4565632592017891677}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Pistol Grip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1238,7 +1242,7 @@ GameObject:
   - component: {fileID: 3514757818041276446}
   - component: {fileID: 3425421426422174868}
   - component: {fileID: 2703438223068520902}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Magazine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1317,7 +1321,7 @@ GameObject:
   - component: {fileID: 8656735182542079819}
   - component: {fileID: 599685442}
   - component: {fileID: 599685441}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Graphics
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1382,7 +1386,7 @@ GameObject:
   - component: {fileID: 7450422646206587791}
   - component: {fileID: 5387851642214159436}
   - component: {fileID: 2462157228964356497}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Rear Iron Sight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1461,7 +1465,7 @@ GameObject:
   - component: {fileID: 6138481447869212940}
   - component: {fileID: 7305939957989248730}
   - component: {fileID: 556319775215026930}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Sight Rails
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1541,7 +1545,7 @@ GameObject:
   - component: {fileID: 3568784222141497044}
   - component: {fileID: 4665593926835707106}
   - component: {fileID: 6865641958263073438}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Charging Handle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1620,7 +1624,7 @@ GameObject:
   - component: {fileID: 5313796222447582032}
   - component: {fileID: 7635173754749133700}
   - component: {fileID: 8154642673224709165}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Left Detail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1700,7 +1704,7 @@ GameObject:
   - component: {fileID: 2623955320793544348}
   - component: {fileID: 1968399364094536701}
   - component: {fileID: 7891951798311780661}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Front Iron Sight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1779,7 +1783,7 @@ GameObject:
   - component: {fileID: 4242198330238479848}
   - component: {fileID: 6509752436313446493}
   - component: {fileID: 8103133665596071254}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Right Detail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1858,7 +1862,7 @@ GameObject:
   - component: {fileID: 8071993543112507880}
   - component: {fileID: 2501827883885764627}
   - component: {fileID: 2143972804768224943}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -41,7 +41,7 @@ public class PlayerController : MonoBehaviour
         if (fov != targetFov)
             MainCamera.fieldOfView = targetFov;
 
-        CamLook.InternalSens = Mathf.Lerp(1f, (1f / Gun.ADSZoom), Gun.ADSLerp);
+        CamLook.InternalSens = Mathf.Lerp(1f, (1f / (Gun.ADSZoom + Gun.ADSScopeZoom)), Gun.ADSLerp);
 
         Vector3 flatDir = Vector3.zero;
         if (Input.GetKey(KeyCode.A))
@@ -55,8 +55,10 @@ public class PlayerController : MonoBehaviour
         flatDir.Normalize();
         ItemOffset.Anim.SetBool("Walk", flatDir != Vector3.zero);
 
-        ItemOffset.AnimScale = 0.1f + (1f - Gun.ADSLerp) * 0.9f;
-        ItemOffset.Scale = 0.1f + (1f - Gun.ADSLerp) * 0.9f;       
+        float scale = Mathf.Lerp(Gun.Anim.NormalSwayMultiplier, Gun.Anim.ADSSwayMultiplier, Gun.ADSLerp);
+
+        ItemOffset.AnimScale = scale;
+        ItemOffset.Scale = scale;       
     }
 
     private void LateUpdate()

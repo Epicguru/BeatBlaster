@@ -45,16 +45,18 @@ public class GunController : MonoBehaviour
 
     [Header("Aim Down Sights")]
     public float ADSZoom = 1.25f;
+    public float ADSScopeZoom = 1f;
 
     [Header("Stats")]
     public int MagazineCapacity = 17;
     public float RPM = 600f;
 
-    [Header("Shell Spawning")]
+    [Header("Effects")]
     public bool SpawnUponShoot = true;
     public FallingShell ShellPrefab;
     public Transform ShellSpawn;
     public Vector3 MinShellVel = new Vector3(1, 1, 0), MaxShellVel = new Vector3(2, 2, 0);
+    public MuzzleFlash MuzzleFlashPrefab;
 
     [Header("Recoil")]
     public Vector2 ShootPunchPitch = new Vector2(-4f, 4f);
@@ -66,7 +68,7 @@ public class GunController : MonoBehaviour
     public bool BulletInChamber = true;
     public int CurrentBullets = 17;
 
-    private float shootTimer = 100f;
+    private float shootTimer = 100f;    
 
     private void Update()
     {
@@ -162,6 +164,7 @@ public class GunController : MonoBehaviour
 
                 if (SpawnUponShoot)
                     SpawnShell();
+                SpawnMuzzleFlash();
 
                 StartCoroutine(ShootLate());
 
@@ -209,6 +212,18 @@ public class GunController : MonoBehaviour
             spawned.transform.position = ShellSpawn.position;
             spawned.transform.rotation = ShellSpawn.rotation;
             spawned.Vel = ShellSpawn.TransformVector(new Vector3(Mathf.Lerp(MinShellVel.x, MaxShellVel.x, Random.value), Mathf.Lerp(MinShellVel.y, MaxShellVel.y, Random.value), Mathf.Lerp(MinShellVel.z, MaxShellVel.z, Random.value)));
+        }
+    }
+
+    public void SpawnMuzzleFlash()
+    {
+        if(MuzzleFlashPrefab != null && Muzzle != null)
+        {
+            var spawned = PoolObject.Spawn(MuzzleFlashPrefab);
+            spawned.transform.position = Muzzle.position;
+            spawned.transform.localScale = Vector2.one * Random.Range(0.15f, 0.25f);
+            spawned.transform.forward = Muzzle.forward;
+            spawned.transform.Rotate(new Vector3(0f, 0f, Random.Range(0f, 360f)), Space.Self);
         }
     }
 

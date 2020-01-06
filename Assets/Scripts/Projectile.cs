@@ -4,6 +4,9 @@
 [RequireComponent(typeof(AutoDestroy))]
 public class Projectile : MonoBehaviour
 {
+    public static Projectile LastFiredProjectile;
+    public static Vector3 LastHit;
+
     public PoolObject PoolObject
     {
         get
@@ -22,7 +25,6 @@ public class Projectile : MonoBehaviour
     [Header("Controls")]
     public LayerMask CollisionMask;
     public Vector3 Velocity;
-    public float LifeTime = 5f;
     public float HitImpulse = 2.5f;
 
     [Header("Damage")]
@@ -31,6 +33,13 @@ public class Projectile : MonoBehaviour
     private void UponDespawn()
     {
         GetComponent<TrailRenderer>().Clear();
+        if (LastFiredProjectile == this)
+            LastFiredProjectile = null;
+    }
+
+    private void UponSpawn()
+    {
+        LastFiredProjectile = this;
     }
 
     private void Update()
@@ -63,6 +72,8 @@ public class Projectile : MonoBehaviour
                 IncomingVelocity = Velocity,
                 HealthChange = -Damage
             };
+
+            LastHit = hit.point;
 
             hit.transform.SendMessageUpwards("UponProjectileHit", phit, SendMessageOptions.DontRequireReceiver);
 

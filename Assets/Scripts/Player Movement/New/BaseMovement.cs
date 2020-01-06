@@ -56,9 +56,17 @@ public class BaseMovement : MonoBehaviour
 
     [Header("Runtime")]
     public bool IsGrounded = false;
+    public Vector3 CurrentMoveVel;
 
     [Header("Debug")]
     public bool DrawFeetDetector = true;
+
+    private Vector3 lastPos;
+
+    private void Update()
+    {
+        UpdateThrowing();
+    }
 
     private void FixedUpdate()
     {
@@ -79,52 +87,54 @@ public class BaseMovement : MonoBehaviour
     {
         Collider.enabled = true;
 
-        // Face downwards towards gravity.
-        //transform.up = Gravity.sqrMagnitude < 0.001f ? Vector3.up : -Gravity;
+        Vector3 currentVel = Vector3.zero;
+        Vector3 inputRaw = Vector3.zero;
 
-        // Update forces vel with current gravity;
-        AddForce(Physics.gravity * Body.mass, Color.green);
-
-        if (!Collider.enabled)
-            Collider.enabled = true;
-
-        Vector2 input = Vector2.zero;
         if (Input.GetKey(KeyCode.A))
-            input.x -= 1f;
-
+            inputRaw.x -= 1f;
         if (Input.GetKey(KeyCode.D))
-            input.x += 1f;
-
+            inputRaw.x += 1f;
         if (Input.GetKey(KeyCode.S))
-            input.y -= 1f;
-
+            inputRaw.z -= 1f;
         if (Input.GetKey(KeyCode.W))
-            input.y += 1f;
+            inputRaw.z += 1f;
+        inputRaw.Normalize();
 
-        float generalSpeed = Input.GetKey(KeyCode.LeftShift) ? RunSpeed : BaseSpeed;
+        bool isRunning = Input.GetKey(KeyCode.LeftShift);
+        float speed = isRunning ? RunSpeed : BaseSpeed;
 
-        float currentForwardSpeed = HeadYaw.InverseTransformVector(Body.velocity).z;
-        float currentHorizontalSpeed = HeadYaw.InverseTransformVector(Body.velocity).x;
+        Vector3 final = Vector3.zero;
+        final += HeadYaw.forward * inputRaw.z * speed;
+        final += HeadYaw.right * inputRaw.x * speed;
 
-        float targetForwardSpeed = input.y * generalSpeed;
-        float targetHorizontalSpeed = input.x * generalSpeed;
+        currentVel += final;
+        if (IsGrounded)
+        {
+            Body.MovePosition(Body.position + currentVel * Time.fixedDeltaTime);
+        }
+        else
+        {
+            Body.velocity += Physics.gravity * Time.fixedDeltaTime;
+        }
 
-        float forwardDelta = targetForwardSpeed - currentForwardSpeed;
-        float horizontalDelta = targetHorizontalSpeed - currentHorizontalSpeed;
-        // URGTODO fix crossing the square problem; fast diagonal movement.
-        Vector3 forwardForce = HeadYaw.forward * (Mathf.Clamp(forwardDelta / (BaseSpeed * 0.5f), -1f, 1f) * (forwardDelta > 0f ? MaxAccelerationForce : MaxDecelerationForce));
-        Vector3 horizontalForce = HeadYaw.right * (Mathf.Clamp(horizontalDelta / (BaseSpeed * 0.5f), -1f, 1f) * (horizontalDelta > 0f ? MaxAccelerationForce : MaxDecelerationForce));
-
-        AddForce(forwardForce, Color.blue);
-        AddForce(horizontalForce, Color.red);
-
-        DrawForceLine(HeadYaw.forward * currentForwardSpeed, Color.cyan);
-        DrawForceLine(HeadYaw.right * currentHorizontalSpeed, Color.magenta);
-
-        //Debug.Log($"Forward delta: {forwardDelta}");
+        CurrentMoveVel = (Body.position - lastPos) / Time.fixedDeltaTime;
+        lastPos = Body.position;
 
         // Detect the ground...
         UpdateGroundInfo();
+    }
+
+    private void OnLeaveGround()
+    {
+        Body.drag = 0.05f;
+        Body.velocity = CurrentMoveVel;
+        Debug.Log($"Left ground with vel {CurrentMoveVel} ({CurrentMoveVel.magnitude})");
+    }
+
+    private void OnEnterGround()
+    {
+        Body.drag = 5f;
+        //Body.velocity = Vector3.zero;
     }
 
     private void AddForce(Vector3 force, Color c)
@@ -187,6 +197,7 @@ public class BaseMovement : MonoBehaviour
 
     private void UpdateGroundInfo()
     {
+        bool old = IsGrounded;
         IsGrounded = false;
 
         int hits = Physics.OverlapSphereNonAlloc(GetFeetDetectorPosition(), GetFeetDetectorRadius(), Overlaps);
@@ -199,6 +210,18 @@ public class BaseMovement : MonoBehaviour
                 break;
             }
         }
+
+        if(old != IsGrounded)
+        {
+            if (IsGrounded)
+            {
+                OnEnterGround();
+            }
+            else
+            {
+                OnLeaveGround();
+            }
+        }
     }
 
     public virtual bool DoesColliderCountForGrounded(Collider c)
@@ -207,6 +230,34 @@ public class BaseMovement : MonoBehaviour
             return false;
 
         return true;
+    }
+
+    public Rigidbody GrabbedObject;
+    private void UpdateThrowing()
+    {
+        if (Input.GetKeyDown(KeyCode.Mouse4))
+        {
+            bool didHit = Physics.Raycast(new Ray(Head.position, Head.forward), out RaycastHit hit, 15f);
+            if (didHit)
+            {
+                GrabbedObject = hit.rigidbody;
+            }
+        }
+
+        if(GrabbedObject != null)
+        {
+            Vector3 targetPos = Head.position + Head.forward * 2f;
+            GrabbedObject.velocity = ((targetPos - GrabbedObject.position) * 15f).ClampToMagnitude(20f);
+        }
+
+        if (Input.GetKeyUp(KeyCode.Mouse4))
+        {
+            if(GrabbedObject != null)
+            {
+                GrabbedObject.velocity = Head.forward * 30f;
+                GrabbedObject = null;
+            }
+        }
     }
 
     private void OnDrawGizmos()

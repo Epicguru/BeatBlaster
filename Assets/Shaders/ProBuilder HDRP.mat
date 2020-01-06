@@ -28,8 +28,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - Vector1_6916565C: 0.173
-    - Vector1_F2622AEB: 0.078
+    - Vector1_6916565C: 0.463
+    - Vector1_F2622AEB: 0.134
     - _AlphaCutoff: 0.5
     - _AlphaCutoffEnable: 0
     - _AlphaDstBlend: 0
